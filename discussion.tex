@@ -1,0 +1,13 @@
+\chapter{Discussion}
+\label{sec:discussion}
+\todo{Incorporate older strategies and models from my previous attempts at analyzing load "unbalancing"}
+
+
+\textbf{Dynamic Models.} The static model of proxy distribution cannot not store assignment information over time. A dynamic, adaptive model where there are multiple rounds of assignments. In each round, a set of clients is assigned to a set of proxies. We can gain insights on the maximum number of attackers that are assigned to proxies in rounds over time. The dynamic model is appropriate for more nuanced delayed insider attacks that occur in multiple rounds. Mahdian studies the dynamic key distribution problem for a trust scheme that addresses delayed attacks \cite{mahdian2010fighting}, for example. Adversaries can delay and strategically decide when to compromise a proxy.
+
+\textbf{Simulation Extensions.} The simulation can easily extend to model different forms of blocking behaviour by a censor. The parameters for a blocking rate process are coded in the simulation although these were not utilized in the simulation nor analyzed for the evaluation.  
+
+My simulation is built as a finite M/M/c/k Jackson network queue model for a series of finite sized trials because I'm working with a simpler, static distribution of proxies. The service times are negligible as we only concern ourselves with honest and malicious client rates, however, these follow an exponential service time distribution with a mean service rate defined as $\mu$. Servers are c, k is ? etc. TODO future work 
+
+
+% TODO zig zag attack https://blog.torproject.org/research-problems-ten-ways-discover-tor-bridges

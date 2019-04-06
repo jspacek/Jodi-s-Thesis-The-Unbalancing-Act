@@ -1,0 +1,97 @@
+\chapter{Background}
+\label{sec:background}
+\newtheorem{theorem}{Theorem}
+
+\textbf{Censorship Threat Model.} The censor in our model chooses a targeted attack to discover proxies. The censor discovers, or \textit{enumerates}, proxies by posing as a legitimate user of a censorship resistance system. The censor may choose to block immediately when a proxy is discovered, known as \textit{immediate blocking}. The censor may instead \textit{delay blocking} in order to maximize the collateral damage to honest clients, or perhaps wait for  a critical time or maximum number of users to time their blocking attack.
+
+We use immediate blocking in our enumeration analysis because as soon as the censor discovers a proxy, it is enumerated. Delayed blocking is simulated in the load balancing and bystander analyses in Chapter \ref{sec:analysis} and Chapter \ref{sec:eval}. The more the blocking is delayed, the more we can observe trends in load balancing and collateral damage.
+
+There are three attacks that lead to the ability of a censor to block a proxy; the Sybil attack followed by the insider attack leading to the enumeration attack. In the first stage of the insider attack, a malicious entity, such as a censor, deploys multiple accounts through anonymous authentication. This is the \textit{Sybil attack} that creates fake accounts to gain entry to the system. The \textit{insider attack} occurs when the knowledge of assigned proxies gained from honest proxy assignment is given to the censor. The \textit{enumeration attack} that follows is usually the action of the censor to block all of the proxies it knows about \cite{wang2013rbridge}. \ivan{This is related to sybil attacks. I think this is a good spot to mention them/cite them, and explain how they are different/similar. I think they are the same thing, just in a specific context.}
+\ivan{I don't think this is accurate: a sybil attack is not related to an insider attack directly. A sybil attack involves creating multiple virtual identities that are actually controlled by one real identity (i.e., multiple clients that are controlled by the censor).}\jodi{Sybil attack is the first step in the process of enumeration. After gaining access, telling the censor about the proxies is the insider attack, same as an insider threat of a typical system. rBridge defines it in their threat model as "A registered malicious user can block his assigned bridges by revealing them to the censor who can
+later block the bridges (referred to as the insider attack)." The registered malicious users are sybils, revealing the assigned bridges is the insider attack, the blocking occurs later on, after insider attack, and is an enumeration/blocking attack.}
+
+The censor's aim is to enumerate, or expose, the proxies in the system with the ultimate goal of exposing honest users. The distribution of proxies to honest users is therefore a cat-and-mouse game between the censor and a censorship resistance system, referred to as the \textbf{proxy distribution problem}. 
+
+The censor is a powerful, nation-state adversary and many of its capabilities are beyond the scope of this work. Additionally, network-level proxy discovery where the censor actively or passively scans IP addresses is not addressed. A censor may monitor all traffic in their network, store the state of the network and monitor requests and responses to known proxy addresses. This allows the censor to potentially mount a zig-zag attack to connect users together by their proxies. Only proxy discovery by assignment of an attacker to a proxy is explored in this thesis.
+
+In our model, the problem of proxy distribution is simply to distribute a collection of $n$ proxies to some users, where $k$ of these users are attackers, in such a way as to provide a degree of functionality to the honest users. From the censor's viewpoint, it more closely aligns to the coupon collector problem where the proxies are coupons and the censor is the coupon collector. However, from the perspective of the proxy distributor, the proxy distribution problem is a form of load balancing where some clients are malicious and the proxy distributor would like to preserve proxies from distribution.
+
+\textbf{Coupon Collector Problem (CCP).} The coupon collector problem is a classic occupancy problem that considers the number of coupons that must be collected before one has the entire collection of coupons. There are $n$ distinct coupons that are collected one at a time where the $i^{th}$ coupon arrives with probability $p_i$ \cite{motwani1995randomized}. The uniform random algorithm, shown in Figure \ref{uni}, chooses one coupon randomly from the list of total coupons.
+
+Where probabilities $p_i$ from $i=1$ to $n$ are equal, the arrivals are uniform random. This equi-probable case, where all probabilities of coupons are equal, shows that the probability of obtaining a new coupon $i$ decreases with each draw. The average number of draws to collect all of the coupons is $nH_n$ where $H_n$ is the $n^{th}$ harmonic number \cite{flajolet1992birthday}. I will now briefly show why this is the case below: 
+
+The summation of probabilities of obtaining a distinct coupon, not previously seen is $\frac{n}{n} + \frac{n-1}{n} + \frac{n-2}{n} + ... + \frac{1}{n}$. The probability of receiving a unique coupon decreases by $1$ for each selection. The probability of a new coupon in the first draw is $100\%$ for example, because all coupons have never been seen before. The very last coupon is the most difficult to select with probability = $1/n$.
+By linearity of expectations, where $P_i$ is the probability of obtaining the $i_{th}$ coupon, this can be written as:
+
+$$P_i = \sum_{i=0}^{n-1}\frac{n-i}{n}$$
+
+This follows a geometric distribution, therefore $E[X_i]=\frac{1}{P_i}$ where $X$ is the sum of the expected number of draws for the $i^{th}$ coupon from $i$ to $n$.
+%\ivan{What about $X_i$ -- how is it related to $X$?}
+%\ivan{Make sure to define the variables before you use them in derivations (e.g., $X_i$ here).}
+The expected number of draws for all $n$ coupons in total is:
+
+$$E[X] = \sum_{i=0}^{n-1}\frac{n}{n-i}$$
+
+By changing the variable $i$ to $j=n-i$, we obtain $E[X] = nH_n$, where $H_n$ is the $n^{th}$ harmonic number:
+
+$$E[X] = n \sum_{j=1}^{n}\frac{1}{j}$$
+$$= nH_n$$
+
+\begin{algorithm}[t]
+\DontPrintSemicolon
+\KwData{A list of coupons and one randomly selected coupon $c$. Coupons are selected uniform randomly}
+\KwResult{A coupon $c$}
+\Begin{
+    $c \longleftarrow$ random$(coupons)$\;
+}
+\caption{Uniform Random Coupon Collection \label{uni}}
+\end{algorithm}
+
+We use two previous works in our analyses in Chapter \ref{sec:analysis}; the uniform random approximation and singleton coupons.
+
+\textbf{Uniform Random.} Recall that the censor collects $n$ proxies in $E[X]= nH_n$ steps. There is no closed form expression for the harmonic number, $H_n$. Instead, the approximation with Euler Mascheroni Constant $\gamma \approx 0.5772156649$ and $H_n = \ln{n} + \gamma + 1/2n$ is used in this analysis \cite{flajolet1992birthday}.
+% TODO is this better than n \ln n? I've also seen that around.
+
+\textbf{Singleton Coupons.} Variations of the CCP are explored in \cite{myers2006some} where a single collector attempts to obtain a specific number of coupons in $n$ total coupons. As part of this analysis, Myers et al. provide the number of singleton coupons, coupons that have been selected exactly once after all of the coupons have been collected. They make the observation that most coupons are duplicates and only a few occur only once. On average, the number of singleton coupons is equal to the harmonic number $H_n$. % TODO should this be a lemma as well? 
+
+\textbf{Load Balancing.} Load balancing strategies are used to evenly allocate resources in distributed systems and have historically been modelled as balls and bins\cite{mitzenmacher2005probability}. The evenness of the distribution is formalized as the \textit{maximum load}. The maximum load is equal to the number of balls in the bin that has, with high probability\footnote{with high probability means at least $1 - O(1/n)$}, the maximum number of balls over all the bins. The closer that the maximum load is to a perfect distribution of $m$ balls over $n$ bins, $m/n$, the more even the distribution, and thereby the load is more evenly balanced. 
+
+\textbf{Uniform Random.} The maximum load of a uniform random placement of balls in bins where $m=n$ is well known to be approximately $\log n / \log \log n$ with high probability. \cite{gonnet1981expected}
+%\ivan{Is this indep. of $m$? strange but neat.}
+See Lemma 5.1 below from the analysis in Chapter 5 of \textit{Probability and Computing} \cite{mitzenmacher2005probability}. 
+
+\newtheorem{lemma}[theorem]{Lemma}
+
+\begin{lemma} When n balls are thrown independently and uniformly at random into n bins, the probability that the maximum load is more than $3 \ln n / \ln \ln n$ is at most $1/n$ for $n$ sufficiently large.
+\end{lemma}
+\textbf{Power of Two Choices.} The \emph{two choice} algorithm for load balancing shows that giving two random choices instead of a uniform random placement results in an exponential improvement in the maximum load \cite{mitzenmacher1996power}. Figure \ref{POD} outlines the power of two choices algorithm that randomly selects two bins at the same time from the list of total bins. To determine the bin that is selected, the algorithm checks the load of each bin. The bin with the \emph{least} number of client assignments is returned. 
+
+\begin{algorithm}[t]
+\DontPrintSemicolon
+\KwData{A list of bins $bins$, two randomly selected bins $b_1$ and $b_2$ with total number balls, or loads, $l_1$ and $l_2$ respectively}
+\KwResult{One of $\{b_1, b_2\}$}
+\Begin{
+    $b_1 \longleftarrow$ random$(bins)$\;
+    $b_2 \longleftarrow$ random$(bins)$\;
+    $l_1 \longleftarrow$ $load(b_1)$\;
+    $l_2 \longleftarrow$ $load(b_2)$\;
+
+    \uIf{$l_1 == l_2$}{
+        return random$(b_1, b_2)$\;\tcc*[r]{break a tie}
+    }
+    \uElseIf{$l_1 < l_2$}{
+        return $b_1$\;\tcc*[r]{$b_1$ is least loaded}
+    }
+
+    return $b_2$\;\tcc*[r]{$b_2$ is least loaded}
+}
+\caption{Power of Two Choices \label{POD}}
+\end{algorithm}
+
+The maximum load in the uniform random case is $\frac{\log n}{\log \log n} + O(1)$ where the number of balls is equal to the number of bins \cite{azar1999balanced}. In the two-choice algorithm, the fullest bin with high probability has $ \frac{\log \log n}{\log d} + O(1)$ balls where the number of bins selected randomly is $2$. Increasing the number of bins $\geq 2$ yields only a constant factor of improvement. The heavily loaded case, where the number of balls strictly increases over the number of bins, $m >> n$, was found to have a maximum load of $m/n + O(\log{\log{n}})$ \cite{berenbrink2000balanced}. \\
+
+\textbf{Tor.} One of the most widely used distributed, anonymous networks is the Tor onion network. Tor is useful for avoiding traffic analysis, a form of internet surveillance, but any anonymous network on its own is insufficient for censorship circumvention. For example, Tor packets are identifiable from telltale signs in the format of traffic sent to the Tor network. Additionally, these packets are easily blacklisted by censors because onion relay IPs in the onion network are publicly known. Tor includes various obfuscation protocols, known as \texttt{pluggable transports}, to hide distinguishing characteristics of packets from censors. These protocols are run by Tor \texttt{bridges}; bridges are single-hop proxies into the Tor onion network. Bridges are run by volunteers in a trusted proxy environment outside of the censor boundary. Tor needs to communicate the address of a bridge to legitimate users securely. This is a form of the \textbf{proxy distribution problem}; to distribute secret bridge addresses (proxies) only to legitimate users, not to censors. 
+
+A user requests bridge addresses from Tor by emailing Tor's bridge service. The bridge service, \texttt{bridgedb}, selects three bridge addresses at a time and rate limits these requests. For example, a request from a single email address can request bridges once daily. The \texttt{bridgedb} data structure is a hashring where an index into the keyspace is generated by hashing unique user information into a subring that is rotated on a scheduled interval.\footnote{https://gitweb.torproject.org/bridgedb.git/tree/bridgedb/distributors/email/distributor.py} This index gives the first bridge address, the other two bridge addresses are the successors of the first index in the ring. The censor can enumerate bridges one-by-one by posing as a legitimate user. Ling, Luo, Yu, Yang, and Fu showed in \cite{ling2015tor} that Tor bridges can be enumerated with bulk emails via HTTPS.
+
+In the upcoming section, Chapter \ref{sec:analysis}, we'll analyze the expected time to collect all of the proxies using the needle algorithm in the context of the coupon collector problem. We'll also refer to the maximum load in the load balancing analysis in our analysis of a reverse power of d choice algorithm. Later on, we'll compare the uniform random, power of d choices, and Tor's distribution mechanism with the needle algorithm in Chapter \ref{sec:eval}.
