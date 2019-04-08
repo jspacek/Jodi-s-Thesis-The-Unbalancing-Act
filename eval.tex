@@ -108,31 +108,18 @@ A distinguishing feature of each algorithm is their varying degree of even distr
 
 % TODO what is the maximum load and is it the correct bound loglogn/logn?
 
-In the experiments shown in Figure \ref{fig:needlelb2}, we ran the needle trials until all of the proxies were enumerated. Here we see the analysis from Lemma $9$ in section \ref{sec:lb} where $px_{n/2}$ has the optimal load. This occurs once all of the proxies have a chance to be assigned. 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure*}[h!]
-\centering
-     \includegraphics[width=1.0\textwidth]{fig/load_balance_needle_to_enum_60_100_200_500.png}
-    \caption{Needle Load Balancing until all proxies are enumerated for $n=60, 100, 200, 500$.}
-
-    \label{fig:needlelb2}
-\end{figure*}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-In the experiments shown in Figure \ref{fig:needlelb3}, we ran the needle trials until all of the proxies were enumerated and then kept running the trials until twice the number of enumeration time. We see that the load balancing continues to become more divided into two halves centred around the optimal load.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
      \includegraphics[width=1.0\textwidth]{fig/load_balance_needle_to_twice_enum_60_100_200_500.png}
     \caption{Needle Load Balancing until all proxies are enumerated twice for $n=60, 100, 200, 500$.}
 
-    \label{fig:needlelb3}
+    \label{fig:needlelb2}
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+In the experiments shown in Figure \ref{fig:needlelb2}, we ran the needle trials until all of the proxies were enumerated and then kept running the trials until twice the number of enumeration time. Here we see the analysis from Lemma $9$ in section \ref{sec:lb} where $px_{n/2}$ has the optimal load. We see that the load balancing continues to become more divided into two halves centred around the optimal load. 
 
 
 \section{Bystander Results}

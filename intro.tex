@@ -23,7 +23,7 @@ Internet censorship is a significant and growing problem that threatens our free
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-This effective censorship technique is circumvented by means of proxies; single-hop servers outside of the censored country that facilitate indirect access to censored information. In Figure \ref{fig:censorblock}, a citizen is blocked from the internet but manages to access sites via a proxy. Censorship resistance systems manage proxies and allow users in censored countries to access blacklisted websites. These systems bypass censors and route users through secret paths. Secret paths rely on proxies that are managed by censorship resistance systems. Proxies serve as intermediary hops between a user and a blacklisted destination site.
+This effective censorship technique can be circumvented by means of proxies; single-hop servers outside of the censored country that facilitate indirect access to censored information. In Figure \ref{fig:censorblock}, a citizen is blocked from the internet but manages to access sites via a proxy. Censorship resistance systems like rBridge \cite{wang2013rbridge}, meek \cite{Fifield2017a}, and Tor's \texttt{bridgedb} \footnote{https://bridges.torproject.org/} manage proxies and allow users in censored countries to access blacklisted websites. These systems bypass censors and route users through secret paths. Secret paths rely on proxies that are managed by censorship resistance systems. Proxies serve as intermediary hops between a user and a blacklisted destination site.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -48,12 +48,15 @@ To get an idea of the scale of censorship events around the world, Figure \ref{f
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-In our proxy distribution problem, we accept that proxies will be distributed to censors. Our goal is to provide service to clients while preserving some proxies from distribution. In this thesis, we introduce a lightweight approach for the proxy distribution problem to distribute proxies to clients while fake clients are present. We implement a scheme with the goal to maximize the resource loss of an attacker. Our approach uses principles of load balancing in a non-intuitive way to preserve random proxies by unbalancing the load on proxies, making them more difficult to discover. This approach operates on the pessimistic assumption that all proxies are destined for discovery over time in a system, where the system cannot distinguish between honest users and fake users. 
-We provide an approximation of the censor's required effort to discover all of the proxies in a system based on the coupon collector problem\cite{flajolet1992birthday}. We validate this approach in a simulator that simulates a proxy distributor in a censorship resistance system. 
+Proxies in censorship resistance systems that cannot distinguish between honest users and fake users are destined for discovery over time. Most systems manually \textit{reserve} a set of proxies that is only distributed when all other proxies are compromised. This manual solution is effective, but does not maximize the allocation of proxies. 
 
-We offer a lightweight solution to the proxy distribution problem by slowing down the progress of the censor to learn new proxies. We contribute to the existing body of knowledge in the following five ways:
+We offer a lightweight, elegant solution to the proxy distribution problem by slowing down the progress of the censor to learn new proxies. Our goal is to provide service to clients while \textit{preserving} proxies from distribution, a goal that is complimentary to \textit{reserving} proxies. We introduce a partially random strategy for the proxy distribution problem to distribute proxies to clients while fake clients are present. Our approach uses principles of load balancing in a non-intuitive way to preserve random proxies by unbalancing the load on proxies, making them more difficult to discover. 
+
+We provide an approximation of the censor's required effort to discover all of the proxies in a system based on the coupon collector problem \cite{flajolet1992birthday}. We validate this approach in a simulator that simulates a proxy distributor in a censorship resistance system. 
+
+We contribute to the existing body of knowledge in the following five ways:
 \begin{enumerate}
-    \item We introduce a novel algorithm, \emph{needle}, that uses reversed power of two choices and uniform random batched distribution to slow the expected time of proxy system compromise.
+    \item We introduce a novel algorithm, \emph{needle}, that uses reversed power of two choices and uniform random distribution to slow the expected time of proxy system compromise.
     \item We analyze the needle algorithm in the context of the coupon collector problem to give bounds on the average time to collect all of the proxies.
     \item We define a censorship threat model to evaluate the needle algorithm in proxy distribution. We define honest users, a proxy distributor, insider attackers, and a colluding censor within this model.
     \item We build a simulation to evaluate the needle proxy distribution algorithm and use this to compare the results of the needle algorithm with Tor's \texttt{bridgedb} distribution, general uniform random and power of two choice load balancing algorithms. 

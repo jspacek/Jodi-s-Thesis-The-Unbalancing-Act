@@ -1,8 +1,8 @@
 \chapter{Abstract}
 \label{sec:abstract}
 
-Internet censorship is a form of digital authoritarianism in certain countries that restrict access to the internet. Internet freedom, to a degree, is possible even in these countries by means of proxies maintained outside of the censor's boundaries. These proxies are compromised by censors who pose as legitimate users to discover proxies. Censors are powerful adversaries and may block access to any proxy once they gain knowledge of it.
+Internet censorship is a form of digital authoritarianism in certain countries that restrict access to the internet. Internet freedom, to a degree, is possible even in these countries by means of proxies maintained outside of the censor's boundaries. These proxies can be compromised by censors who pose as legitimate users to discover proxies. Censors are powerful adversaries and may block access to any proxy once they know about it.
 
-We propose a novel technique to address the proxy distribution problem in this thesis. The \texttt{needle algorithm} preserves some proxies by limiting their distribution. The number of proxies preserved is controlled by the algorithm's parameters. We show that it is a useful mechanism for preserving proxies under a censorship threat model. 
+We propose a novel technique to address the proxy distribution problem in this thesis. We introduce the \textit{needle} algorithm that preserves proxies by limiting their distribution. The number of proxies preserved is controlled by the algorithm's parameters. We show that it is a useful mechanism for preserving proxies under a censorship threat model. 
 
 We examine characteristics of the algorithm in a simulation. Three measures are important under the censorship threat model; the enumeration or discovery of all proxies, load balancing, and the collateral damage of innocent bystanders. We compare the results of these experiments with two well-known algorithms, uniform random and power of d choices, as well as Tor's \texttt{bridgedb} proxy assignment mechanism. 

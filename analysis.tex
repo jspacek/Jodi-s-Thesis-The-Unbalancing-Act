@@ -1,13 +1,9 @@
 \chapter{Needle Algorithm}
 \label{sec:analysis}
 
-One may find a parallel between the coupon collector problem and the problem of a censor who collects, not coupons, but proxies. Consider both the coupon and proxy as objects in some vast space, where all of these objects have the same chance of being selected. Each object is replaced after it is selected so that any object may be selected multiple times. It is increasingly difficult to collect all of the objects. The more objects that are selected, the more difficult it is to gather the complete collection of unique objects. The selection of the very last unique object ends the game, since only the selection of distinct objects counts towards progress in this problem.
-
-There is an expected number of attempts $E[X]$ by the collector to collect $n$ distinct objects. This can be extended to a censor, whose problem it is to enumerate all the proxies. We use $E[X]$ to analyze the amount of effort that it would take a censor, on average, to enumerate all proxies. To simplify this analysis, we do not consider the ratio of honest to malicious clients and, for now, assume there is one malicious client, the censor. Honest and malicious client rates are examined in Section \ref{sec:bystander}, bystanders.
-
 \begin{algorithm}[t]
 \DontPrintSemicolon
-\KwData{$proxies$, $n$, $s=\lfloor{n/g}\rfloor$, $move$, $p_1$, $p_2$}
+\KwData{$proxies$, $n$, $s=\lfloor{n/g}\rfloor$}
 \KwResult{One of $\{p_1, p_2\}$}
 \Begin{
     $window \longleftarrow (start, end)$\;
@@ -19,10 +15,12 @@ There is an expected number of attempts $E[X]$ by the collector to collect $n$ d
         $move \longleftarrow 0$
     }
     
-    $move \longleftarrow move + 1$
+    $move \longleftarrow move + 1$\;
     
-    $p_1 \longleftarrow$ random$(proxies)$\;
-    $p_2 \longleftarrow$ random$(proxies)$\;
+    $sublist \longleftarrow (proxies$ $[start, end])$\;
+
+    $p_1 \longleftarrow$ random$(sublist)$\;
+    $p_2 \longleftarrow$ random$(sublist)$\;
     $l_1 \longleftarrow$ $load(p_1)$\;
     $l_2 \longleftarrow$ $load(p_2)$\;
 
@@ -38,25 +36,17 @@ There is an expected number of attempts $E[X]$ by the collector to collect $n$ d
 \caption{Needle Algorithm \label{needle}}
 \end{algorithm}
 
-I present a new algorithm, the \emph{needle} algorithm, and compare it to two well-known algorithms, uniform random and power of two choices, as well as Tor's bridge distribution scheme, in order to contrast their respective trade-offs and suitability under differing system goals. The goal of the needle algorithm is to preserve some proxies from within the larger list of $n$ proxies. It achieves this by breaking the list of proxies into sublists. It moves through the proxies jumping from sublist to sublist, referred to as \texttt{GIANTSTEPS} or $g$. These steps isolate some proxies from distribution.\footnote{Those readers familiar with the algorithmic composition techniques of jazz chord progression may draw a parallel from the restriction of proxies to the restriction of notes in a key change. These are reminiscent of Coltrane's Giant Steps \cite{lateef1981repository}.}
-
-The algorithm has the following parameters:
+I present a new algorithm, the \emph{needle} algorithm, and compare it to two well-known algorithms, uniform random and power of two choices, as well as Tor's bridge distribution scheme, in order to contrast their respective trade-offs and suitability under differing system goals. The goal of the needle algorithm is to preserve some proxies from within the larger list of $n$ proxies. It achieves this by breaking the list of proxies into sublists. It moves through the proxies jumping from sublist to sublist, referred to as \texttt{GIANTSTEPS} or $g$. These steps isolate some proxies from distribution.\footnote{Those readers familiar with the algorithmic composition techniques of jazz chord progression may draw a parallel from the restriction of proxies to the restriction of notes in a key change. These are reminiscent of Coltrane's Giant Steps \cite{lateef1981repository}.} The algorithm has the following parameters:
     \begin{itemize}
         \item $proxies$: a sorted list of proxies ordered by load
         \item $n$: the total number of proxies
         \item $g$: the number of steps around the proxy ring
         \item $s$: the number of proxies in each $g$ step
         \item $move$: move to the next step 
-        \item $px_1, px_2$: two randomly selected proxies
+        \item $px_1, px_2$: two randomly selected proxies from within the $sublist$ of the current step $g$, sampled with replacement
     \end{itemize}
 
-The algorithm selects two proxies uniform randomly in each $GIANTSTEP$. Using reverse power of 2 choices, it then chooses the \textit{heavier loaded} proxy and returns this proxy to the collector. (Note that the standard power of d choices algorithm chooses the lighter loaded proxy.) The step begins at the bottom of the list of proxies and is moved step-wise around the list eventually wrapping so that all proxies have an opportunity to be selected, shown in Figure \ref{fig:giantstepring}.
-
-Some number of proxies are less likely to be selected as the $GIANTSTEP$ moves. For example, the proxies in previous selections left behind are referred to as \emph{needles} because they are hidden from the current selection. Additionally, proxies that have a lower chance of appearing in the random selection, e.g., the last few distinct proxies to be selected, have a lower probability of appearing in any selection. It also unbalances the load on proxies thereby increasing the number of selections that the censor must perform because there are more duplicate selections (misses).
-
-We can frame the needle algorithm as a Coupon Collector Problem (CCP) variant. Suppose that the coupon collector organizes collections from several different neighbourhoods. Each neighbourhood distributes a different set of coupons, and each of the coupons in each set is distinct. The coupon collector needs to travel through all of the neighbourhoods (these are conveniently arranged in a circle). The collector can't magically move from place to place and does not zigzag from neighbourhood to neighbourhood. If the collector misses a coupon from the first neighbourhood, then he must wait until all of the other neighbourhoods are visited before returning to collect the missed coupon. The missed coupon is rarer than all of the previously collected coupons. It is also rarer than all future coupons up until the point at which the collector returns to the specific neighbourhood with the missed coupon.
-
-In our CCP variant, the reverse power of 2 choices gives the collector a decision to make; he selects 2 coupons at random. If he already has more of 1 coupon than the other, he must keep the coupon that is less rare, and return the rarer coupon back to the store in the current neighbourhood. 
+The algorithm selects two proxies uniform randomly in each $GIANTSTEP$ $g$. Using reverse power of 2 choices, it then chooses the \textit{heavier loaded} proxy and returns this proxy to the collector. (Note that the standard power of d choices algorithm chooses the lighter loaded proxy.) The step begins at the bottom of the list of proxies and is moved step-wise around the list eventually wrapping so that all proxies have an opportunity to be selected, shown in Figure \ref{fig:giantstepring}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -68,11 +58,20 @@ In our CCP variant, the reverse power of 2 choices gives the collector a decisio
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Some number of proxies are less likely to be selected as step $g$ moves. For example, the proxies in previous selections left behind are referred to as \emph{needles} because they are hidden from the current selection. Additionally, proxies that have a lower chance of appearing in the random selection, e.g., the last few distinct proxies to be selected, have a lower probability of appearing in any selection. As $g$ moves, it also unbalances the load on proxies thereby increasing the number of selections that the censor must perform because there are more duplicate selections (misses).
+\section{Coupon Collector Variant: Neighbourhood Ring}
 
-The needle algorithm is partly randomized and partly deterministic. The uniform random selection of 2 proxies is randomized, and the reverse power of 2 choices is deterministic. In addition, the movement of the steps is also deterministic. Because the steps move clock-wise around the ring, proxies are enumerated randomly within deterministic batches. This serves two functions; by limiting the size of proxies in a step, it squeezes the number of possible proxies that a censor can enumerate in each assignment. The second function is that by moving around the ring, some proxies are left behind. This makes it more difficult for the censor to enumerate a complete collection of proxies due to these rare proxies (not unlike needles in a haystack). The first function tends towards a deterministic enumeration of all of the proxies, so one must take care to not set too many giant steps. 
+One may find a parallel between the Coupon Collector Problem (CCP) and the problem of a censor who collects, not coupons, but proxies. Consider both the coupon and proxy as objects in some vast space, where all of these objects have the same chance of being selected. Each object is replaced after it is selected so that any object may be selected multiple times. It is increasingly difficult to collect a distinct object because most objects are selected more than once. The rarest object is the one that occurs at the very end to complete the collection. The selection of this very last unique object ends the game, since only the selection of distinct objects counts towards progress in this problem.
 
-In Figure \ref{fig:8ring}, we see how different step sizes affect the movement around the rings. With one-step, the enumeration time is the slowest, because the needle proxies must be discovered within the largest pool of size $n$. Enumeration time starts to decrease with 2-steps, because the needle proxies are more likely to be selected with a smaller pool size of $n/2$. The enumeration time decreases with each increase in giant step $g$. The algorithm only functions as expected up to $g=n/2$ where there are at least $2$ proxies for each step. If there is only a single proxy in each step, as shown in the bottom right corner, the proxies are enumerated one after the other in $n$ assignments, because the needle proxies are the only proxies that are selected in each step and our reverse power of 2 choices algorithm cannot function as intended. For this reason, the algorithm is restricted to giant step $1>g\leq \frac{n}{2}$.
+We can frame the needle algorithm as a CCP variant. Suppose that the coupon collector organizes collections from several different neighbourhoods. Each neighbourhood distributes a different set of coupons, and each of the coupons in each set is distinct. The coupon collector needs to travel through all of the neighbourhoods (these are conveniently arranged in a ring). The collector can't magically move from place to place and does not zigzag from neighbourhood to neighbourhood. If the collector misses a coupon from the first neighbourhood, then he must wait until all of the other neighbourhoods are visited before returning to collect the missed coupon. The missed coupon is rarer than all of the previously collected coupons. It is also rarer than all future coupons up until the point at which the collector returns to the specific neighbourhood with the missed coupon.
 
+In our CCP variant, the reverse power of 2 choices gives the collector a decision to make; he selects 2 coupons at random. If he already has more of 1 coupon than the other, he must keep the coupon that is less rare, and return the rarer coupon back to the store in the current neighbourhood. 
+
+There is an expected number of attempts $E[X]$ by the collector to collect $n$ distinct objects. This can be extended to a censor, whose problem it is to enumerate, or discover, all the proxies. We use $E[X]$ to analyze the amount of effort that it would take a censor, on average, to enumerate all proxies. To simplify this analysis, we do not consider the ratio of honest to malicious clients and, for now, assume there is one malicious client, the censor. Honest and malicious client rates are examined in Section \ref{sec:bystander}, bystanders.
+
+The needle algorithm is partly randomized and partly deterministic. The uniform random selection of 2 proxies is randomized, and the reverse power of 2 choices is deterministic. In addition, the movement of the steps is also deterministic. Because the steps move clock-wise around the ring, proxies are enumerated randomly within deterministic batches. Moving the steps around the ring serves two functions; 1) by limiting the size of proxies in a step, it squeezes the number of possible proxies that a censor can enumerate in each assignment, and 2) some proxies are left behind. This makes it more difficult for the censor to enumerate a complete collection of proxies due to these rare proxies (not unlike needles in a haystack). Restricting the size of the sublists in a step tends towards a deterministic enumeration of all of the proxies, so one must take care to not set too many giant steps. 
+
+In Figure \ref{fig:8ring}, we see how different step sizes affect the enumeration of proxies. With one-step, the enumeration time is the slowest, because the needle proxies must be discovered within the largest pool of size $n$. Enumeration time starts to decrease with 2-steps, because the needle proxies are more likely to be selected with a smaller pool size of $n/2$. The enumeration time decreases with each increase in giant step $g$. The algorithm only functions as expected up to $g=n/2$ where there are at least $2$ proxies for each step. If there is only a single proxy in each step, as shown in the bottom right corner, the proxies are enumerated one after the other in $n$ assignments, because the needle proxies are the only proxies that are selected in each step and our reverse power of 2 choices algorithm cannot function as intended. We therefore restrict the giant step size to $1>g\leq \frac{n}{2}$ so that the proxies are never enumerated in deterministic order.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -86,7 +85,7 @@ In Figure \ref{fig:8ring}, we see how different step sizes affect the movement a
  
 \section{Enumeration Analysis}
 
-Enumeration of proxies occurs when the censor learns all of the proxies. The CCP model is used to calculate the average time to collect all distinct coupons. We re-frame this scenario for proxy distribution and refer to material on CCP from Section \ref{sec:background}. The enumeration of proxies is modeled as the complete collection of coupons. 
+Recall that the enumeration of our collection of proxies occurs when the censor learns all of the proxies through assignment. The enumeration of proxies is modeled as the complete collection of coupons. The CCP neighbourhood ring variant is used to calculate the average time to collect all distinct proxies.
  
 
 \begin{table}[h]
@@ -112,9 +111,9 @@ Enumeration of proxies occurs when the censor learns all of the proxies. The CCP
   \label{tab:vars}
 \end{table}
 
-There are two key intuitions in the \textttt{needle} algorithm of Figure \ref{needle}; one is to unbalance the load over all the proxies so as to unbalance the evenness of discovery using a reversed power of 2 choices algorithm, where the most heavily loaded proxy is chosen. Another intuition in the needle algorithm is to break the distribution of proxies into \textttt{giant steps}. We first investigate the simplest version of the needle algorithm, where the giant step $g$ is equal to $1$, meaning that there is a single list from which to randomly select two proxies, the total list.
+There are two key intuitions to delay enumeration in the \textit{needle} algorithm outlined in Algorithm \ref{needle}. One is to unbalance the load over all the proxies so as to unbalance the evenness of discovery using a reversed power of 2 choices algorithm, where the most heavily loaded proxy is chosen. Another intuition is to break the distribution of proxies into giant steps. We first investigate the simplest version of the needle algorithm, where the giant step $g$ is equal to $1$, meaning that there is a single list from which to randomly select two proxies, the total list.
 
-There are two different, yet intertwined, flavours of probabilities in our algorithm; the probability of \textit{selection} and the probability of \textit{choice}. The probability of selection is uniform random and is restricted by the size of the giant step $g$. When a pair of proxies is selected uniform randomly from the total collection of proxies, this is referred to as the selection. When we refer to likelihood of selection, we are talking about the probability of selection in relation to the coupon collector problem. The probability of choice relates to the order in which a proxy is selected as a pair.  The likelihood of choice is dependent on the load of a proxy as it affects the choice in the reverse power of 2 choices algorithm. Probability of choice is important in our analyses, particularly in the load balancing analysis.
+There are two different, yet intertwined, flavours of probabilities in our algorithm; the probability of \textit{selection} and the probability of \textit{choice}. The probability of selection is uniform random and is restricted by the size of the giant step $g$. When a pair of proxies is selected uniform randomly from the total collection of proxies, this is referred to as the selection. When we refer to likelihood of selection, we are talking about the probability of selection in relation to the coupon collector problem. Because we sample proxies randomly with replacement, a proxy can be selected twice in a pair. The probability of choice relates to the order in which a proxy is selected as a pair. The likelihood of choice is dependent on the load of a proxy as it affects the choice in the reverse power of 2 choices algorithm. Probability of choice is important in our analyses, particularly in the load balancing analysis.
 
 \subsection{Algorithm Termination}
 
@@ -123,17 +122,17 @@ We define two lemmas below that we will use to approximate upper and lower bound
 \begin{lemma}{A pair of the rarest proxy terminates the algorithm.}
 \label{rarest}
 
-Assume we have the rarest proxy \textbf{$px_n$} that has probability equal to $1/n$ of being selected in the reverse power of 2 choices algorithm. Suppose that this proxy is selected twice in a row and forms a pair. If the choice from this selected pair does not terminate the algorithm, there must be some other proxy in the list that has not yet been chosen. If this statement is true, then proxy \textbf{$px_n$} must have a probability greater than $1/n$ and our initial assumption is false, leading us to a contradiction. Therefore, the proxy with probability $1/n$ terminates the algorithm if it is selected twice in a row, as a pair. In other words, the least likely, rarest proxy must occur as a pair for the algorithm to terminate. 
+Assume we have the rarest proxy \textbf{$px_n$} that has probability equal to $1/n$ of being selected in the reverse power of 2 choices algorithm. Suppose that this proxy is selected twice in a row and forms a pair. If the choice from this selected pair does not terminate the algorithm, there must be some other proxy in the collection of $n$ proxies that has not yet been chosen. If this statement is true, then proxy \textbf{$px_n$} must have a probability greater than $1/n$ and our initial assumption is false, leading us to a contradiction. Therefore, the proxy with probability $1/n$ terminates the algorithm if it is selected twice in a row, as a pair. In other words, the least likely, rarest proxy must occur as a pair for the algorithm to terminate. 
 \end{lemma}
 
-\begin{lemma}{The probability of enumerating all the proxies is at least $1/n^2$.}
+\begin{lemma}{The probability of enumerating the rarest proxy is at least $1/n^2$.}
 
-By Lemma \ref{rarest}, the needle algorithm terminates after the rarest proxy is selected in a pair. The probability that the rarest proxy is selected is $1/n$. We sample with replacement, so the probability that the rarest proxy is selected twice in a pair, by counting argument, is $p=(\frac{1}{n})(\frac{1}{n}) = 1/n^2$. Enumerating all of the other proxies has probabilities less than $1/n^2$, so the enumeration of the complete collection is at least $1/n^2$.
+By Lemma \ref{rarest}, the needle algorithm terminates after the rarest proxy is selected in a pair. The probability that the rarest proxy is selected is $1/n$. We sample with replacement, so the probability that the rarest proxy is selected twice in a pair, by counting argument, is $p=(\frac{1}{n})(\frac{1}{n}) = 1/n^2$.
 \end{lemma}
 
 \subsection{Upper Bound}  
 
-We use the number of singletons described in Chapter \ref{sec:background}, $H_n$, directly to provide an upper bound on the average number of pairs selected, E[X], before all of the proxies are enumerated. Singletons need to be paired with proxies that also have load = 0 to ensure that they are chosen by the reversed power of 2 choice algorithm. (They also need to appear as the first item in the pair for the tie-breaking logic.) Most of the singleton proxies occur at the end of the selection process, so the probability of selection for of each of them is closer to $1/n$ than $n/n$. In the worst case (for the censor), all of the singleton proxies occur at the end of the collection. Since most of the proxies have load $> 1$ as $n$ increases, there is little chance that singleton proxies are chosen against non-singleton proxies, because most of these non-singleton proxies have appeared numerous times already and have higher assignment loads.
+We use the number of singletons described in Chapter \ref{sec:background}, $H_n$, directly to provide an upper bound on the average number of pairs selected, $E[X]$, before all of the proxies are enumerated. Singletons are proxies that occur only once and so have the lowest probability of selection. These proxies need to be paired with other proxies that have lighter loads to ensure that they are chosen by the reversed power of 2 choice algorithm. (They also need to appear as the first item in the pair for the tie-breaking logic.) Most of the singleton proxies occur at the end of the selection process, so the probability of selection for each of them is closer to $1/n$ than $n/n$. In the worst case (for the censor), all of the singleton proxies occur at the end of the collection. Since most of the proxies have load $> 1$ as $n$ increases, there is little chance that singleton proxies are chosen against non-singleton proxies, because most of these non-singleton proxies have appeared numerous times already and have higher assignment loads.
 
 Recall that $X_i$ is a random variable representing the number of assignments needed to enumerate the $i^{th}$ proxy. $E[X]$ is the average number of assignments needed to enumerate all of the proxies. We denote the $i^{th}$ proxy as $px_i$ where the last selected, rarest proxy is $px_{n}$ with probability $1/n$. The second rarest proxy is $px_{n-1}$ with probability $2/n$. The first proxy selected is $px_1$ with probability $1$.\\
  
@@ -143,7 +142,7 @@ Recall that $X_i$ is a random variable representing the number of assignments ne
 
 \emph{Proof.} We use the probability of collecting all of the $H_n$ singleton proxies to provide an upper bound on the average number of assignments needed to enumerate all of the proxies, $E[X]$. The probability of collecting all of the singleton proxies is bounded above by the likelihood that the singleton proxies are selected in a pair with the rarest proxy $px_n$, the worst case for a censor. The rarest proxy $px_n$ is selected with probability $\frac{1}{n}$. The probability that some $i^{th}$ singleton proxy is selected in a pairing with $px_n$ is $p_i = (\frac{i}{n})(\frac{1}{n})$. 
 
-If we pair all of the singleton proxies with the rarest singleton proxy, $px_n$, we get the probability pairs $(\frac{1}{n})(\frac{1}{n}) + (\frac{2}{n})(\frac{1}{n}) + ... + (\frac{H_n}{n})(\frac{1}{n})$. There is no guarantee that $H_n$ is an integer, indeed it will not be. Fractional pairings can't happen in our pairings, eg. there is no half of a proxy selected. Because we are dealing with an upper bound, we say that the number of singleton proxies is $\leq \lceil{H_n}\rceil$. In addition, we need an even number of pairings, so $\lceil{H_n}\rceil$ is rounded to an even number. Generally stated, the probability of this pairing over all $H_n$ singletons is:
+If we pair all of the singleton proxies with the rarest singleton proxy, $px_n$, we get the probability pairs $(\frac{1}{n})(\frac{1}{n}) + (\frac{2}{n})(\frac{1}{n}) + ... + (\frac{H_n}{n})(\frac{1}{n})$. There is no guarantee that $H_n$ is an integer, indeed it will not be. Fractional pairings can't happen in our pairings, e.g. there is no half of a proxy selected. Because we are dealing with an upper bound, we say that the number of singleton proxies is $\leq \lceil{H_n}\rceil$. In addition, we need an even number of pairings, so $\lceil{H_n}\rceil$ is rounded to an even number. Generally stated, the probability of this pairing over all $H_n$ singletons is:
 
 $$p \leq \sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{i}{n}\bigg) \bigg(\frac{1}{n}\bigg)$$
 $$= \sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{i}{n^2}\bigg)$$
@@ -158,7 +157,7 @@ $$E[X] \leq \sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{n^2}{i}\bigg)$$
 $$E[X] = n^2 \sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{1}{i}\bigg)$$
 $$E[X] = \bigg(n^2\bigg) \bigg(H_{\lceil{H_n}\rceil}\bigg)$$
 
-It is impractical to churn on the few singleton proxies out of all $n$ proxies so, to make the algorithm more practical, it is divided into giant steps $g$. Each division has a sublist of size $s$. In this way, the singleton proxy churn is distributed over all $g$ giant steps, so that the same number $H_n$ singleton proxies are preserved, but the enumeration does not churn. In other words, the distribution of the singleton proxies means that they are easier to enumerate, because the sublist is a smaller size in each step and the censor gets more chances to find the singletons.  We rework the upper bound to incorporate the number of giant steps $g$.
+When giant step $g$ is very small, the algorithm churns on a few proxies, meaning that a small proportion of proxies have high loads. By dividing $n$ proxies into $g>1$ giant steps, where each step has a sublist of size $s$, we make the algorithm more load balanced. In other words, the distribution of proxies in each step is smaller so the censor gets more chances to find the singletons.  We rework the upper bound to incorporate the number of giant steps $g$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
