@@ -1,13 +1,12 @@
 \chapter{Discussion}
 \label{sec:discussion}
-\todo{Incorporate older strategies and models from my previous attempts at analyzing load "unbalancing"}
 
+\section{Future Work}
 
-\textbf{Dynamic Models.} The static model of proxy distribution cannot not store assignment information over time. A dynamic, adaptive model where there are multiple rounds of assignments. In each round, a set of clients is assigned to a set of proxies. We can gain insights on the maximum number of attackers that are assigned to proxies in rounds over time. The dynamic model is appropriate for more nuanced delayed insider attacks that occur in multiple rounds. Mahdian studies the dynamic key distribution problem for a trust scheme that addresses delayed attacks \cite{mahdian2010fighting}, for example. Adversaries can delay and strategically decide when to compromise a proxy.
+\textbf{Blocking behaviour.} The simulation can easily extend to model different forms of blocking behaviour by a censor. The parameters for a blocking rate process are coded in the simulation although these were not utilized in the simulation nor analyzed for the evaluation.  
 
-\textbf{Simulation Extensions.} The simulation can easily extend to model different forms of blocking behaviour by a censor. The parameters for a blocking rate process are coded in the simulation although these were not utilized in the simulation nor analyzed for the evaluation.  
+\textbf{Proxies joining and leaving.} A more realistic version of the simulator is to run the experiments with some proxies joining and leaving. This would provide more data on how the needle algorithm preserves new proxies, rather than only dealing with proxies that are created at the same time.
 
-My simulation is built as a finite M/M/c/k Jackson network queue model for a series of finite sized trials because I'm working with a simpler, static distribution of proxies. The service times are negligible as we only concern ourselves with honest and malicious client rates, however, these follow an exponential service time distribution with a mean service rate defined as $\mu$. Servers are c, k is ? etc. TODO future work 
+\textbf{Service times.} The simulation was not fully utilized to analyze classic problems like Quality of Service. It would be particularly interesting to examine how non-needle proxies are able to handle the larger loads in a real system.
 
-
-% TODO zig zag attack https://blog.torproject.org/research-problems-ten-ways-discover-tor-bridges
+\textbf{Tor integration.} The needle algorithm could be run inside of the Tor bridedb codebase to validate the simplicity of the algorithm's approach. It would require a different method of client assignment because Tor uses hashes of IP addresses and does not store load or assignment information in the same way that the needle algorithm requires for its operation.

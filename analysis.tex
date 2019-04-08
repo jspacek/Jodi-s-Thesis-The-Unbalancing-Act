@@ -4,7 +4,7 @@
 \begin{algorithm}[t]
 \DontPrintSemicolon
 \KwData{$proxies$, $n$, $s=\lfloor{n/g}\rfloor$}
-\KwResult{One of $\{p_1, p_2\}$}
+\KwResult{One of $\{px_1, px_2\}$}
 \Begin{
     $window \longleftarrow (start, end)$\;
     \uIf{$move > 1$}{
@@ -19,24 +19,24 @@
     
     $sublist \longleftarrow (proxies$ $[start, end])$\;
 
-    $p_1 \longleftarrow$ random$(sublist)$\;
-    $p_2 \longleftarrow$ random$(sublist)$\;
-    $l_1 \longleftarrow$ $load(p_1)$\;
-    $l_2 \longleftarrow$ $load(p_2)$\;
+    $px_1 \longleftarrow$ random$(sublist)$\;
+    $px_2 \longleftarrow$ random$(sublist)$\;
+    $l_1 \longleftarrow$ $load(px_1)$\;
+    $l_2 \longleftarrow$ $load(px_2)$\;
 
     \uIf{$l_1 == l_2$}{
-        return $p_1$\;\tcc*[r]{break a tie}
+        return $px_1$\;\tcc*[r]{break a tie}
     }
     \uElseIf{$l_1 > l_2$}{
-        return $p_1$\;\tcc*[r]{$p_1$ is heaviest loaded}
+        return $px_1$\;\tcc*[r]{$px_1$ is heaviest loaded}
     }
-    return $p_2$\;\tcc*[r]{$p_2$ is heaviest loaded}
+    return $px_2$\;\tcc*[r]{$px_2$ is heaviest loaded}
     
 }
 \caption{Needle Algorithm \label{needle}}
 \end{algorithm}
 
-I present a new algorithm, the \emph{needle} algorithm, and compare it to two well-known algorithms, uniform random and power of two choices, as well as Tor's bridge distribution scheme, in order to contrast their respective trade-offs and suitability under differing system goals. The goal of the needle algorithm is to preserve some proxies from within the larger list of $n$ proxies. It achieves this by breaking the list of proxies into sublists. It moves through the proxies jumping from sublist to sublist, referred to as \texttt{GIANTSTEPS} or $g$. These steps isolate some proxies from distribution.\footnote{Those readers familiar with the algorithmic composition techniques of jazz chord progression may draw a parallel from the restriction of proxies to the restriction of notes in a key change. These are reminiscent of Coltrane's Giant Steps \cite{lateef1981repository}.} The algorithm has the following parameters:
+I present a new algorithm, the \emph{needle} algorithm, and compare it to two well-known algorithms, uniform random and power of 2 choices, as well as Tor's bridge distribution scheme, in order to contrast their respective trade-offs and suitability under differing system goals. The goal of the needle algorithm is to preserve some proxies from within the larger list of $n$ proxies. It achieves this by breaking the list of proxies into sublists. It moves through the proxies jumping from sublist to sublist, referred to as \texttt{GIANTSTEPS} or $g$. These steps isolate some proxies from distribution.\footnote{Those readers familiar with the algorithmic composition techniques of jazz chord progression may draw a parallel from the restriction of proxies to the restriction of notes in a key change. These are reminiscent of Coltrane's Giant Steps \cite{lateef1981repository}.} The algorithm has the following parameters:
     \begin{itemize}
         \item $proxies$: a sorted list of proxies ordered by load
         \item $n$: the total number of proxies
@@ -46,7 +46,7 @@ I present a new algorithm, the \emph{needle} algorithm, and compare it to two we
         \item $px_1, px_2$: two randomly selected proxies from within the $sublist$ of the current step $g$, sampled with replacement
     \end{itemize}
 
-The algorithm selects two proxies uniform randomly in each $GIANTSTEP$ $g$. Using reverse power of 2 choices, it then chooses the \textit{heavier loaded} proxy and returns this proxy to the collector. (Note that the standard power of d choices algorithm chooses the lighter loaded proxy.) The step begins at the bottom of the list of proxies and is moved step-wise around the list eventually wrapping so that all proxies have an opportunity to be selected, shown in Figure \ref{fig:giantstepring}.
+The algorithm selects two proxies uniform randomly in each giant step $g$. Using reverse power of 2 choices, it then chooses the \textit{heavier loaded} proxy and returns this proxy to the collector. (Note that the standard power of d choices algorithm chooses the lighter loaded proxy.) The step begins at the bottom of the list of proxies and is moved step-wise around the list eventually wrapping so that all proxies have an opportunity to be selected, shown in Figure \ref{fig:giantstepring}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -71,7 +71,7 @@ There is an expected number of attempts $E[X]$ by the collector to collect $n$ d
 
 The needle algorithm is partly randomized and partly deterministic. The uniform random selection of 2 proxies is randomized, and the reverse power of 2 choices is deterministic. In addition, the movement of the steps is also deterministic. Because the steps move clock-wise around the ring, proxies are enumerated randomly within deterministic batches. Moving the steps around the ring serves two functions; 1) by limiting the size of proxies in a step, it squeezes the number of possible proxies that a censor can enumerate in each assignment, and 2) some proxies are left behind. This makes it more difficult for the censor to enumerate a complete collection of proxies due to these rare proxies (not unlike needles in a haystack). Restricting the size of the sublists in a step tends towards a deterministic enumeration of all of the proxies, so one must take care to not set too many giant steps. 
 
-In Figure \ref{fig:8ring}, we see how different step sizes affect the enumeration of proxies. With one-step, the enumeration time is the slowest, because the needle proxies must be discovered within the largest pool of size $n$. Enumeration time starts to decrease with 2-steps, because the needle proxies are more likely to be selected with a smaller pool size of $n/2$. The enumeration time decreases with each increase in giant step $g$. The algorithm only functions as expected up to $g=n/2$ where there are at least $2$ proxies for each step. If there is only a single proxy in each step, as shown in the bottom right corner, the proxies are enumerated one after the other in $n$ assignments, because the needle proxies are the only proxies that are selected in each step and our reverse power of 2 choices algorithm cannot function as intended. We therefore restrict the giant step size to $1>g\leq \frac{n}{2}$ so that the proxies are never enumerated in deterministic order.
+In Figure \ref{fig:8ring}, we see how different step sizes affect the enumeration of proxies. With one-step, the enumeration time is the slowest, because the needle proxies must be discovered within the largest pool of size $n$. Enumeration time starts to decrease with 2-steps, because the needle proxies are more likely to be selected with a smaller pool size of $n/2$. The enumeration time decreases with each increase in giant step $g$. The algorithm only functions as expected up to $g=n/2$ where there are at least $2$ proxies for each step. If there is only a single proxy in each step, as shown in the bottom right corner, the proxies are enumerated one after the other in $n$ assignments, because our reverse power of 2 choices algorithm cannot function as intended. We therefore restrict the giant step size to $1>g\leq \frac{n}{2}$ so that the proxies are never enumerated in deterministic order.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -111,8 +111,6 @@ Recall that the enumeration of our collection of proxies occurs when the censor 
   \label{tab:vars}
 \end{table}
 
-There are two key intuitions to delay enumeration in the \textit{needle} algorithm outlined in Algorithm \ref{needle}. One is to unbalance the load over all the proxies so as to unbalance the evenness of discovery using a reversed power of 2 choices algorithm, where the most heavily loaded proxy is chosen. Another intuition is to break the distribution of proxies into giant steps. We first investigate the simplest version of the needle algorithm, where the giant step $g$ is equal to $1$, meaning that there is a single list from which to randomly select two proxies, the total list.
-
 There are two different, yet intertwined, flavours of probabilities in our algorithm; the probability of \textit{selection} and the probability of \textit{choice}. The probability of selection is uniform random and is restricted by the size of the giant step $g$. When a pair of proxies is selected uniform randomly from the total collection of proxies, this is referred to as the selection. When we refer to likelihood of selection, we are talking about the probability of selection in relation to the coupon collector problem. Because we sample proxies randomly with replacement, a proxy can be selected twice in a pair. The probability of choice relates to the order in which a proxy is selected as a pair. The likelihood of choice is dependent on the load of a proxy as it affects the choice in the reverse power of 2 choices algorithm. Probability of choice is important in our analyses, particularly in the load balancing analysis.
 
 \subsection{Algorithm Termination}
@@ -134,18 +132,25 @@ By Lemma \ref{rarest}, the needle algorithm terminates after the rarest proxy is
 
 We use the number of singletons described in Chapter \ref{sec:background}, $H_n$, directly to provide an upper bound on the average number of pairs selected, $E[X]$, before all of the proxies are enumerated. Singletons are proxies that occur only once and so have the lowest probability of selection. These proxies need to be paired with other proxies that have lighter loads to ensure that they are chosen by the reversed power of 2 choice algorithm. (They also need to appear as the first item in the pair for the tie-breaking logic.) Most of the singleton proxies occur at the end of the selection process, so the probability of selection for each of them is closer to $1/n$ than $n/n$. In the worst case (for the censor), all of the singleton proxies occur at the end of the collection. Since most of the proxies have load $> 1$ as $n$ increases, there is little chance that singleton proxies are chosen against non-singleton proxies, because most of these non-singleton proxies have appeared numerous times already and have higher assignment loads.
 
-Recall that $X_i$ is a random variable representing the number of assignments needed to enumerate the $i^{th}$ proxy. $E[X]$ is the average number of assignments needed to enumerate all of the proxies. We denote the $i^{th}$ proxy as $px_i$ where the last selected, rarest proxy is $px_{n}$ with probability $1/n$. The second rarest proxy is $px_{n-1}$ with probability $2/n$. The first proxy selected is $px_1$ with probability $1$.\\
- 
-\label{theorem:UBEX}
-\begin{theorem} {Upper bound on $E[X] \leq (n^2) \bigg(H_{\lceil{H_n}\rceil}\bigg)$} 
-\end{theorem}
+\begin{lemma}{The probability of collecting all of the singleton proxies is \\
+$$\sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{i}{n^2}\bigg)$$}
 
-\emph{Proof.} We use the probability of collecting all of the $H_n$ singleton proxies to provide an upper bound on the average number of assignments needed to enumerate all of the proxies, $E[X]$. The probability of collecting all of the singleton proxies is bounded above by the likelihood that the singleton proxies are selected in a pair with the rarest proxy $px_n$, the worst case for a censor. The rarest proxy $px_n$ is selected with probability $\frac{1}{n}$. The probability that some $i^{th}$ singleton proxy is selected in a pairing with $px_n$ is $p_i = (\frac{i}{n})(\frac{1}{n})$. 
+The probability of collecting all of the singleton proxies is bounded above by the likelihood that the singleton proxies are selected in a pair with the rarest proxy $px_n$, the worst case for a censor. The rarest proxy $px_n$ is selected with probability $\frac{1}{n}$. The probability that some $i^{th}$ singleton proxy is selected in a pairing with $px_n$ is $p_i = (\frac{i}{n})(\frac{1}{n})$. 
 
 If we pair all of the singleton proxies with the rarest singleton proxy, $px_n$, we get the probability pairs $(\frac{1}{n})(\frac{1}{n}) + (\frac{2}{n})(\frac{1}{n}) + ... + (\frac{H_n}{n})(\frac{1}{n})$. There is no guarantee that $H_n$ is an integer, indeed it will not be. Fractional pairings can't happen in our pairings, e.g. there is no half of a proxy selected. Because we are dealing with an upper bound, we say that the number of singleton proxies is $\leq \lceil{H_n}\rceil$. In addition, we need an even number of pairings, so $\lceil{H_n}\rceil$ is rounded to an even number. Generally stated, the probability of this pairing over all $H_n$ singletons is:
 
 $$p \leq \sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{i}{n}\bigg) \bigg(\frac{1}{n}\bigg)$$
 $$= \sum_{i=1}^{\lceil{H_n}\rceil} \bigg(\frac{i}{n^2}\bigg)$$
+
+\end{lemma}
+
+Now, we are ready to present the upper bound on the average number of assignments before all of the proxies are enumerated. Recall that $X_i$ is a random variable representing the number of assignments needed to enumerate the $i^{th}$ proxy, therefore $E[X_i]$ is the average number of assignments to collect the $i^{th}$ proxy. $E[X]$ is the average number of assignments needed to enumerate all of the proxies. We denote the $i^{th}$ proxy as $px_i$ where the last selected, rarest proxy is $px_{n}$ with probability $1/n$. The second rarest proxy is $px_{n-1}$ with probability $2/n$. The first proxy selected is $px_1$ with probability $1$.\\
+ 
+\label{theorem:UBEX}
+\begin{theorem} {Upper bound on $E[X] \leq \frac{n^2H_{\lceil{H_n}\rceil}}{g}$} 
+\end{theorem}
+
+\emph{Proof.} We use the probability of collecting all of the $H_n$ singleton proxies from Lemma $4$ to provide an upper bound on the average number of assignments needed to enumerate all of the proxies, $E[X]$. 
 
 Like the classic CCP, this follows a geometric distribution, so $E[X_i] =\frac{1}{P_i}$. 
 
@@ -169,54 +174,17 @@ When giant step $g$ is very small, the algorithm churns on a few proxies, meanin
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\label{UBGS}
-\begin{theorem}{Upper Bound on Giant Step $E[X] \leq \frac{n^2H_{\lceil{H_n}\rceil}}{g}$} 
-\end{theorem}
-
-We have $g$ giant steps and $H_n$ singleton proxies; $g$ divides the enumeration time into smaller sized sublists, making it proportionally easier for the censor to enumerate all $n$ proxies. In the worst case, all of the singleton proxies are located in different steps. This is the most difficult case for a censor is because all of the other steps have to wait for the other steps' singletons to be enumerated. Figure \ref{fig:ubgs} shows a collection of proxies with $5$ giant steps. The first enumerated sublist occurs in the top right portion of the ring (denoted $(1)$). The algorithm proceeds clock-wise, moving through each sublist one by one. We showed in Theorem 4 that the upper bound on the single step algorithm is the worst case for the singletons where $E[X] \leq (n^2) (H_{\lceil{H_n}\rceil})$.
-
-We divide the upper bound in Theorem 4 by the number of steps $g$.
+We have $g$ giant steps and $H_n$ singleton proxies; $g$ divides the enumeration time into smaller sized sublists, making it proportionally easier for the censor to enumerate all $n$ proxies. In the worst case (for the censor), all of the singleton proxies are located in different steps, so all of the steps wait for the other steps' singletons to be enumerated before the algorithm can terminate. Figure \ref{fig:ubgs} shows a collection of proxies with $5$ giant steps. The first enumerated sublist occurs in the top right portion of the ring (denoted $(1)$). The algorithm proceeds clock-wise, moving through each sublist one by one. We divide the upper bound by the number of steps $g$ to obtain:
 
 $$E[X] \leq \frac{ n^2H_{\lceil{H_n}\rceil}}{g}$$
 
-Table \ref{tab:enumn100} shows our results from 1000 trials of varying step size for 100 proxies, and the calculated upper and lower bounds. We address the lower bound approximation in the next section.
-
-\begin{table}[t]
-\begin{tabular}{l|l|l|l|l|l|l}
-             Proxies & Trials & Sublist (s) & Step (g) & Upper Bound & Experiment & Lower Bound  \\
-\hline
-\hline
-100 & 1000 & 100 & 1 & 40000 & \textbf{20619} & 12500 \\\hline
-100 & 1000 & 50 & 2 & 20000 & \textbf{10718}	& 6250 \\\hline
-100 & 1000 & 33 & 3 & 13333	& \textbf{7763} & 4083 \\\hline
-100 & 1000 & 25 & 4 & 10000 & \textbf{6738} & 3403 \\\hline
-100 & 1000 & 20 & 5 & 8000 & \textbf{5869} & 2722\\\hline
-100 & 1000 & 16 & 6 & 6667 & \textbf{4800} & 2091 \\\hline
-100 & 1000 & 12 & 8 & 5000 & \textbf{3850} & 1568\\\hline
-100 & 1000 & 10 & 10 & 4000	& \textbf{3537} & 1424\\\hline
-100 & 1000 & 8 & 14 & 2857 & \textbf{2839} & 1276\\\hline
-100 & 1000 & 5 & 20 & 2000 & \textbf{1987} & 712\\\hline
-100 & 1000 & 4 & 25 & 1600 & \textbf{1683} & 569\\\hline
-100 & 1000 & 2 & 50 & 800 & \textbf{788} & 285\\\hline
-100 & 1000 & 1 & 100 & 400 & \textbf{100} & 100\\\hline
-
-\end{tabular}
-\caption{Experimental results for 100 proxies over 1000 trials\label{tab:enumn100} }
-\end{table}
 
 \subsection{Lower Bound}
+Before we present the lower bound on the average number of assignments before all of the proxies are enumerated, we consider the probability of singleton proxies that are very likely to be chosen. The reverse power of 2 choices relies on the load of the proxy in order to choose a proxy from a selected pair. Consider a singleton proxy that by definition has a lighter load because it is selected infrequently. When this proxy is paired with some other proxy with a higher probability of selection, the singleton proxy has \textit{less} chance to be chosen, because the proxy with the higher probability of selection has a higher chance of having more load. In other words, this singleton proxy has both a lower probability of selection and lower probability of choice. 
 
-\label{theorem:LBEX}
-\begin{theorem} {Lower bound on $E[X] \geq n^2H^{(2)}_{\lfloor{H_n}\rfloor}$}
-\end{theorem}
+We concern ourselves with a lower bound, so we would like to know the type of scenario in which a singleton proxy has the higher probability of choice, meaning that the censor is able to enumerate proxies more easily. A singleton proxy paired with itself is guaranteed to be chosen and thus has the highest probability of choice out of any other pairing. We would like to know the probability of a pair of singleton proxies to appear.
 
-\emph{Proof.} We again use $H_n$ singleton proxies, this time to bound the average number of assignments from below. We first consider a giant step = 1 to simplify our analysis. We consider cases where $g\geq1$ in the next section. 
-
-The lower bound on $E[X]$ is the easiest case for the censor to collect all $n$ proxies. The fastest enumeration of all of the proxies is to collect all of the singleton proxies the first time that they show up in a randomly selected pair, that is, their very first selection. 
-
-The reverse power of 2 choices relies on the load of the proxy in order to choose a proxy from a selected pair. Consider a singleton proxy that by definition has a lighter load. When this proxy is paired with some other proxy with a higher probability of selection, the singleton proxy has \textit{less} chance to be chosen, because the proxy with the higher probability of selection has a higher chance of having more load. In other words, the singleton proxy has both a lower probability of selection and lower probability of choice. 
-
-We concern ourselves with a lower bound, so we would like to know the type of scenario in which a singleton proxy has the greatest probability of choice, meaning that the censor is able to enumerate proxies more easily. A singleton proxy paired with itself is guaranteed to be chosen and thus has the highest probability of choice. 
+\begin{lemma}{Singleton proxies occur in a pair with probability $p \geq \sum_{i=1}^{\lfloor{H_n}\rfloor} (\frac{i}{n})^2$}
 
 % Maybe a bit confusing: 
 % Another intuition is to consider the pairing of a singleton proxy with another, rarer singleton proxy because the rarer proxy most likely has a lighter load. This would also result in a high likelihood that the singleton proxy is chosen. However, the probability of selection of this proxy is smaller than the probability of a singleton proxy paired with itself, so it is not useful in developing our lower bound.
@@ -225,21 +193,7 @@ A repeated pair selection of the singleton proxies gives us the probability pair
 
 $$p \geq \sum_{i=1}^{\lfloor{H_n}\rfloor} \bigg(\frac{i}{n}\bigg)^2$$
 
-We have a geometric distribution, so we can write: $$E[X_i] = \frac{1}{p_i} = \frac{1}{(\frac{i}{n})^2} = \bigg(\frac{n}{i}\bigg)^2$$
-
-The expected number of assignments to find all $n$ proxies is bounded below by the sum of $E[X_1]$ to $E[X_n]$, where $n=\lfloor{H_n}\rfloor$:\\
-
-$$E[X] \geq \sum_{i=1}^{\lfloor{H_n}\rfloor} \bigg(\frac{n}{i}\bigg)^2$$
-$$= n^2 \sum_{i=1}^{\lfloor{H_n}\rfloor} \frac{1}{i^2}$$
-$$= n^2H^{(2)}_{\lfloor{H_n}\rfloor}$$\\
-
-% what is randomness cost? from pod_ccp "We see that the randomness cost is expressed approximately by a factor log n."
-
-
-\label{LBGS}
-\begin{theorem}{Lower Bound on Giant Step $E[X] \geq (g)\bigg(s^2H^{(2)}_{\lfloor{H_n}\rfloor}\bigg)$} 
-\end{theorem}
-
+\end{lemma}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
@@ -250,11 +204,29 @@ $$= n^2H^{(2)}_{\lfloor{H_n}\rfloor}$$\\
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\emph{Proof.} The lower bound for $g$ giant steps in the needle algorithm is the easiest case for the censor to enumerate all $n$ proxies, where there are $g$ sublists of size $s$. Returning to the idea of a ring of proxies, if all of the sublists are enumerated one directly after the other, none of the other steps are "held up" by any of the other, previous steps. This means that there are no extra revolutions necessary to enumerate the steps, as shown in Figure \ref{fig:lbgs}. 
 
-Recall that in Theorem 5, the lower bound on the single step needle algorithm is $E[X] \geq n^2H^{(2)}_{\lfloor{H_n}\rfloor}$. If we have $g$ sublists of size $s=n/g$, then the lower bound on the giant step needle algorithm is:
+We use Lemma $6$ in the following proof to obtain the lower bound on $E[X]$. The fastest enumeration of all of the proxies is to collect all of the singleton proxies the first time that they show up in a randomly selected pair, that is, their very first selection. We again use $H_n$ singleton proxies, this time to bound the average number of assignments from below. We consider cases where $g\geq1$ and we change the variable $n$ to $s$ because we draw from $g$ sublists of size $s$. 
 
-$$E[X] \geq (g)\bigg(s^2H^{(2)}_{\lfloor{H_n}\rfloor}\bigg)$$
+Returning to the idea of a ring of proxies, if all of the sublists are enumerated one directly after the other, none of the other steps are "held up" by any of the other previous steps. This means that there are no extra revolutions necessary to enumerate the steps, as shown in Figure \ref{fig:lbgs}.
+
+
+\label{theorem:LBEX}
+\begin{theorem} {Lower bound on $E[X] \geq (g) (s^2)H^{(2)}_{\lfloor{H_n}\rfloor}$}
+\end{theorem}
+
+\emph{Proof.} Using the probability of pairs from Lemma $6$, we have a geometric distribution, so we can write: $$E[X_i] = \frac{1}{p_i} = \frac{1}{(\frac{i}{s})^2} = \bigg(\frac{s}{i}\bigg)^2$$
+
+The expected number of assignments to find all $n$ proxies is bounded below by the sum of $E[X_1]$ to $E[X_n]$, where $n$ is the number of singleton proxies,$n=\lfloor{H_n}\rfloor$:\\
+
+$$E[X] \geq \sum_{i=1}^{\lfloor{H_n}\rfloor} \bigg(\frac{s}{i}\bigg)^2$$
+$$= s^2 \sum_{i=1}^{\lfloor{H_n}\rfloor} \frac{1}{i^2}$$
+$$= s^2H^{(2)}_{\lfloor{H_n}\rfloor}$$\\
+
+We have $g$ such enumerations of sublists with size $s$, one per each $g$ steps, therefore for all $n$ proxies are bounded from below by:
+
+$$E[X] \geq (g)(s^2)H^{(2)}_{\lfloor{H_n}\rfloor}$$\\
+
+This concludes our discussion of bounds on the average number of assignments to enumerate all of the proxies in the needle algorithm. In the next section, we dive into a load balancing analysis to tell us more about how clients are assigned to proxies.
 
 \label{sec:lb}
 \section{Load Balancing Analysis}
@@ -283,9 +255,9 @@ We discussed maximum load as a metric for load balancing in Chapter \ref{sec:bac
   \label{tab:vars}
 \end{table}
 
-\begin{lemma}{Proxy loads have a linear relationship.}
+\begin{lemma}{Proxy loads increase linearly.}
 
-We sort the proxies by their load, or their respective numbers of assignments, averaged over multiple trials. (Note that these are not static proxy numbers, but proxies that are numbered by their load.) We see that the loads have a linear relationship. This is because the probability of selection of the $px_i$ proxy decreases linearly from $i=1...n$. The probability of selecting the first proxy $px_1$ is $p_1=\frac{n}{n}=1$, the probability of the second $px_2$ is $p_2=\frac{n-1}{n}$, $p_{n-1}=2/n$, $p_{n}=1/n$. This relationship between the probability of proxy selection is further reinforced by the probability of choice, where the maximum loaded proxy is always chosen over a lower load.
+We sort the proxies by their load, or their respective numbers of assignments, averaged over multiple trials. (Note that these are not static proxy numbers, but proxies that are numbered by their load.) We see that the loads have a linear relationship. This is because the probability of selection of the $px_i$ proxy decreases linearly from $i=1...n$. The probability of selecting the first proxy $px_1$ is $p_1=\frac{n}{n}=1$, the probability of the second $px_2$ is $p_2=\frac{n-1}{n}$, $p_{n-1}=2/n$, $p_{n}=1/n$, increasing linearly. This linear relationship between the probability of proxy selection is further reinforced by the probability of choice, where the maximum loaded proxy is always chosen over a lower load.
 \end{lemma}
 
 \begin{lemma}{The middle proxy, $px_{n/2}$, has the optimal load $\ell$.}
@@ -339,7 +311,7 @@ The probability that a proxy is exposed more closely approaches $100\%$ as the m
 $$p_e \leq 1 - p_x$$
 $$ = 1 - (1-p_a)^{u}$$
 
-\jodi{Maybe parts of this lemma should be in the proof. Seems too long for a lemma?}
+%\jodi{Maybe parts of this lemma should be in the proof. Seems too long for a lemma?}
 \end{lemma}
 
 We've shown how the maximum load affects the probability of assigned attackers in a proxy, now we will compare the relationship of load balancing to bystanders. 

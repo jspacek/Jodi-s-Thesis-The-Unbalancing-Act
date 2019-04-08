@@ -33,7 +33,7 @@ Each proxy has an service time that is exponentially distributed. This is not a 
 % no longer seems applicable
 %We define the aggressive blocking strategy as a censor that blocks each proxy as it is discovered. A complete blocking strategy is a simplified version of delayed blocking where the censor blocks all of the proxies when they are all enumerated, with the assumption that the censor knows the total number of proxies in the system in order to simplify the analysis. The choice of model here is important because it informs the behaviours of an attacker. 
 
-\textbf{Parameters.} Parameters in the simulation control the rate of honest and malicious client arrival intensity, the total number of proxies, and the size of the sliding window for the needle algorithm. These are sweeping parameters; the simulation runs across a range of values for each parameter to produce a variety of conditions for the analysis. The analysis operates on the dependent variables such as maximum load and the expected time to overtake the system. The variable names and descriptions are outlined in the following table:
+\textbf{Parameters.} Parameters in the simulation control the rate of honest and malicious client arrival intensity, the total number of proxies, and the size of the step for the needle algorithm. These are sweeping parameters; the simulation runs across a range of values for each parameter to produce a variety of conditions for the analysis. The analysis operates on the dependent variables such as maximum load and the expected time to overtake the system. The variable names and descriptions are outlined in the following table:
 
 \begin{table}[h]
   \centering
@@ -43,8 +43,8 @@ Each proxy has an service time that is exponentially distributed. This is not a 
 	Parameter Name   & Description  \\
 	\hline
     CLIENT ARRIVAL RATE & intensity of client arrival rate \\
-	ATTACKER ARRIVAL RATE      & sigma for client arrival rate \\
-	NUM PROXIES      & sigma for blocking rate \\
+	ATTACKER ARRIVAL RATE      & intensity of attacker client arrival rate \\
+	n     & number of proxies \\
 	\hline
 	\end{tabular}
   \caption{Variables in the Simulation}
@@ -55,7 +55,7 @@ The simulator was written in Python using simpy, a discrete event based simulato
 
 \section{Enumeration Results}
 
-\textbf{Giant step analysis.} We ran the needle algorithm in the simulator, with only malicious attacker clients, to observe how many assignments a censor needs to enumerate all of the proxies. In section \ref{UBGS}, we analyzed the giant step version of the needle algorithm where step size $g > 1$. Asymptotic results are shown in Figure \ref{fig:gsn100} for 1000 trials using 100 proxies in each experiment. The experimental results are shown in the black, solid line. The upper and lower bounds, $E[X] \leq \frac{(n^2)H_{\lceil{H_n}\rceil}}{g}$ and $E[X] \geq (g)(s^2H^{(2)}_{\lfloor{H_n}\rfloor})$ respectively, are shown in dashed lines.
+\textbf{Giant step analysis.} We ran the needle algorithm in the simulator, with only malicious attacker clients, to observe how many assignments a censor needs to enumerate all of the proxies. In section \ref{theorem:UBEX}, we analyzed the giant step version of the needle algorithm where step size $g > 1$. Results are shown in Figure \ref{fig:gsn100} for 1000 trials using 100 proxies in each experiment. The experimental results are shown in the black, solid line. The upper and lower bounds, $E[X] \leq \frac{(n^2)H_{\lceil{H_n}\rceil}}{g}$ and $E[X] \geq (g)(s^2H^{(2)}_{\lfloor{H_n}\rfloor})$ respectively, are shown in dashed lines.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -67,7 +67,32 @@ The simulator was written in Python using simpy, a discrete event based simulato
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\textbf{Enumeration Comparison.} We know from the Coupon Collector problem that the uniform random distribution of coupons results in $nH_n$ total assignments before collection. We see that the uniform random distribution of Tor's \texttt{bridgedb} follows a similar enumeration. We use the regular Power of 2 Choices algorithm to show how a more optimal load balancing algorithm results in faster enumeration\cite{xu2011generalized}. In the upcoming section, we'll take a closer look at the load balancing properties of each of these algorithms.
+Table \ref{tab:enumn100} shows the numerical data from these 1000 trials of varying step size for 100 proxies, and the calculated upper and lower bounds.
+
+\begin{table}[t]
+\begin{tabular}{l|l|l|l|l|l|l}
+             Proxies & Trials & Sublist (s) & Step (g) & Upper Bound & Experiment & Lower Bound  \\
+\hline
+\hline
+100 & 1000 & 100 & 1 & 40000 & \textbf{20619} & 12500 \\\hline
+100 & 1000 & 50 & 2 & 20000 & \textbf{10718}	& 6250 \\\hline
+100 & 1000 & 33 & 3 & 13333	& \textbf{7763} & 4083 \\\hline
+100 & 1000 & 25 & 4 & 10000 & \textbf{6738} & 3403 \\\hline
+100 & 1000 & 20 & 5 & 8000 & \textbf{5869} & 2722\\\hline
+100 & 1000 & 16 & 6 & 6667 & \textbf{4800} & 2091 \\\hline
+100 & 1000 & 12 & 8 & 5000 & \textbf{3850} & 1568\\\hline
+100 & 1000 & 10 & 10 & 4000	& \textbf{3537} & 1424\\\hline
+100 & 1000 & 8 & 14 & 2857 & \textbf{2839} & 1276\\\hline
+100 & 1000 & 5 & 20 & 2000 & \textbf{1987} & 712\\\hline
+100 & 1000 & 4 & 25 & 1600 & \textbf{1683} & 569\\\hline
+100 & 1000 & 2 & 50 & 800 & \textbf{788} & 285\\\hline
+100 & 1000 & 1 & 100 & 400 & \textbf{100} & 100\\\hline
+
+\end{tabular}
+\caption{Experimental results for 100 proxies over 1000 trials\label{tab:enumn100} }
+\end{table}
+
+\textbf{Enumeration Comparison.} We compare the four different algorithms in Figure \ref{fig:comparison}. The y-axis shows the average enumeration time over 1000 trials where a higher number of assignments is favourable because it takes longer for a censor to discover all of the proxies. The x-axis shows the trials over different sizes of $n$ proxies. We know from the Coupon Collector problem that the uniform random distribution of coupons results in $nH_n$ total assignments before collection. We see that the uniform random distribution of Tor's \texttt{bridgedb} follows a similar enumeration. We use the regular Power of 2 Choices algorithm to show how a more optimal load balancing algorithm results in faster enumeration \cite{xu2011generalized}. In the upcoming section, we'll take a closer look at the load balancing properties of each of these algorithms.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -138,7 +163,10 @@ Our bystander results are affected by load balancing and the proportion of attac
 
 We see from the results of this experiment that the number of malicious attackers is increased with load in all of the algorithms, however, in the needle algorithm, lighter loaded proxies have fewer malicious clients. The power of 2 choices algorithm has the flattest distribution of malicious clients, meaning that proxies are enumerated the quickest.
 
-\todo{Graph showing the average total number of bystanders over all experiments (capped at 2000 assignments}
+% show that the reason that uniform random enumerates slower than POD
+% is because the load is unbalanced, 
+
+% TODO another graph to show ? what is missing? mybae some numbers, rather than graphs? or linking back to the theorems at least about bystanders? 
 
 
 \section{Comparison}
