@@ -26,8 +26,8 @@ We are interested in how proxies are enumerated by a censor throughout the syste
 	\cline{1-2}
 	Parameter Name   & Description  \\
 	\hline
-    CLIENT ARRIVAL RATE & intensity of client arrival rate $1/\lambda$ \\
-	ATTACKER ARRIVAL RATE  & intensity of attacker client arrival rate $1/ \lambda$\\
+    $\lambda_h $ client arrival rate & intensity of client arrival rate $1/\lambda$ \\
+	$\lambda_a$ attacker arrival rate  & intensity of attacker client arrival rate $1/ \lambda$\\
 	n     & number of proxies \\
 	\hline
 	\end{tabular}
@@ -37,13 +37,13 @@ We are interested in how proxies are enumerated by a censor throughout the syste
 
 In addition to the dynamic model, the queue model is a standard that suits the problem of proxy distribution well. Mitzenmacher models the power of two choice algorithm as an idealized process, or a queue system of infinite size, that is later related to a finite system by bounding the error between the two \cite{mitzenmacher1996power}. 
 
-Our simulation is best described as a feed-forward network of M/M/c/k queues. This is similar to a load balancing system with a constant number of servers. However, in this scenario, the load balancer is in fact the proxy distributor that is responsible for distributing clients to proxies. The number of proxies is fixed; their respective enumerations represent a pure death process, as I do not consider proxy birth rate in the system. Figure \ref{fig:mmck} shows the network queue layout where the proxy distributor assigns clients to proxies uniform randomly, where the arrival of clients to proxies is evenly distributed $\lambda/n$. 
+Our simulation is best described as a feed-forward network of M/M/c/k queues. This is similar to a load balancing system with a constant number of servers. However, in this scenario, the load balancer is in fact the proxy distributor that is responsible for distributing clients to proxies. Figure \ref{fig:mmck} shows the network queue layout where the proxy distributor assigns clients to proxies uniform randomly, where the arrival of clients to proxies is evenly distributed $\lambda/n$. 
 
 Clients arrive with a Poisson arrival distribution with variable $\lambda$ clients per minute. This means that, on average, one client appears at every $1 / \lambda$ minutes and we define this as the arrival intensity. In this model, we are additionally concerned with honest and malicious client arrival rates. As the proportion of attackers in the system increases, the arrival rate, or intensity of malicious client arrivals increases.
 
 Each proxy has a service time that is exponentially distributed. This is not a traditional service rate because the system assumes short-lived client connections. The important function of the server is to keep a record of each client assignment that can be used by the censor to discover clients in the system. In other words, even if the client leaves the system, the censor still gains knowledge of the proxy and may impact the client's future connections to the known proxy, effectively mounting a potential future blocking attack on the proxy.
 
-\textbf{Parameters.} Parameters in the simulation control the rate of honest and malicious client arrival intensity, the total number of proxies, and the size of the step for the needle algorithm. These are sweeping parameters; the simulation runs across a range of values for each parameter to produce a variety of conditions for the analysis. The analysis operates on the dependent variables such as maximum load and the expected time to overtake the system. The variable names and descriptions are outlined in table \ref{tab:vars}:
+\textbf{Parameters.} Parameters in the simulation control the rate of honest and malicious client arrival intensity, the total number of proxies, and the size of the step for the needle algorithm. These are sweeping parameters; the simulation runs across a range of values for each parameter to produce a variety of conditions for the analysis. The analysis operates on the dependent variables such as maximum load and the expected time to overtake the system. The variable names and descriptions are outlined in table \ref{tab:vars}.
 
 The simulator was written in Python using simpy, a discrete event based simulator.\footnote{https://simpy.readthedocs.io/en/latest/} The evaluation uses numpy\footnote{http://www.numpy.org/} and matplotlib\footnote{https://matplotlib.org/} for data manipulation and graphing.
 
@@ -101,7 +101,7 @@ Table \ref{tab:enumn100} shows the numerical data from these 1000 trials of vary
 
 \section{Load Balancing Results}
 
-Recall that in the analysis, Lemma $9$ in section \ref{sec:lb} stated that $px_{n/2}$ has the optimal load. In the experiments shown in Figure \ref{fig:needlelb2}, we ran the needle trials until all of the proxies were enumerated and then kept running the trials until twice the number of enumeration time. We see that the load balancing is divided into two halves centred around the optimal load. We also note that the maximum load for each of the experiments is no more than 4\% of the total load.
+Recall that in the analysis, Lemma $9$ in section $3.3$ stated that $px_{n/2}$ has the optimal load. In the experiments shown in Figure \ref{fig:needlelb2}, we ran the needle trials until all of the proxies were enumerated and then kept running the trials until twice the number of enumeration time. We see that the load balancing is divided into two halves centred around the optimal load. We also note that the maximum load for each of the experiments is no more than 4\% of the total load.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -115,7 +115,7 @@ Recall that in the analysis, Lemma $9$ in section \ref{sec:lb} stated that $px_{
 
 We wish to observe and compare the load balancing tendencies of each of the four algorithms. The x-axis in Figure \ref{fig:lbcomp} orders all of the proxies by their respective loads. The y-axis shows the percentage of the total load that each proxy holds. We ran each algorithm for 5000 assignments with a total of 100 proxies. 
 
-A distinguishing feature of each algorithm is their varying degree of even distribution of assignments to proxies. The power of two choices algorithm gives the most evenly balanced distribution. The uniform random distribution results in the next best load balancing. Tor's bridgedb mechanism less balanced than uniform random but more balanced than the needle algorithm. The needle algorithm results in the worst load balancing.
+A distinguishing feature of each algorithm is their varying degree of even distribution of assignments to proxies. The power of 2 choices algorithm gives the most evenly balanced distribution. The uniform random distribution results in the next best load balancing. Tor's mechanism is less balanced than uniform random but more balanced than the needle algorithm. The needle algorithm results in the worst load balancing.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
@@ -131,7 +131,7 @@ A distinguishing feature of each algorithm is their varying degree of even distr
 \section{Bystander Results}
 \label{sec:bystandereval}
 
-Load balancing and the proportion of attackers directly affect the number of bystanders. Bystanders are those honest clients that still receive service in the presence of malicious clients. For the experiment in Figure \ref{fig:malcompare}, we run all of the algorithms so they each have 5000 assignments and the probability that client is malicious is 50\%. We sort the proxies by their loads in increasing order and plot the numbers of malicious clients assigned to each proxy, from lowest loaded proxy to highest loaded.
+Load balancing and the proportion of attackers directly affect the number of bystanders. Bystanders are those honest clients that still receive service in the presence of malicious clients. For the experiment in Figure \ref{fig:malcompare}, we run all of the algorithms so they each have 5000 assignments and the probability that a client is malicious is 50\%. We sort the proxies by their loads in increasing order and plot the numbers of malicious clients assigned to each proxy, from lowest loaded proxy to highest loaded.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]

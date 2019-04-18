@@ -12,26 +12,26 @@ Once a censor knows about a proxy, it can decide to block that proxy. The second
 
 In addition, the censor keeps track of proxies that are the most \textit{popular}. The censor determines that a proxy is popular by the number of times a proxy is assigned compared to other proxies that it knows about. The censor then chooses to block proxies based on their popularity ranking.
 
-We make different kinds of blocking assumptions in the evaluation section in Chapter \ref{sec:eval}. Immediate blocking makes the most sense when we evaluate enumeration because as soon as the censor is assigned to any proxy, it is enumerated. We assume delayed blocking behaviour in the load balancing analysis because we want to observe load balancing trends over time, without any blocking on the part of the censor. The bystander evaluation assumes that the censor blocks the most popular proxies so that we can measure the number of bystanders with our unbalancing strategy.
+We make different kinds of blocking assumptions in the evaluation section in Chapter \ref{sec:eval}. Immediate blocking makes the most sense when we evaluate enumeration because as soon as the censor is assigned to any proxy, it is enumerated. We assume delayed blocking behaviour in the load balancing analysis because we want to observe load balancing trends over time, without any blocking on the part of the censor. The bystander evaluation assumes that the censor blocks the most popular proxies so that we can measure the number of bystanders in the remaining proxies.
 
 \subsection{Out of Scope}
 
-The censor is a powerful, nation-state adversary and many of its capabilities are beyond the scope of this work. For example, network-level proxy discovery where the censor actively or passively scans IP addresses is not addressed. A censor may monitor all traffic in their network, store the state of the network, and monitor requests and responses to known proxy addresses. This allows the censor to potentially mount a zig-zag attack to connect users together by their proxies \cite{BRIDGEDISCO:2019}. Only proxy discovery by assignment of an attacker to a proxy is explored in this thesis.
+The censor is a powerful, nation-state adversary and many of its capabilities are beyond the scope of this work. For example, network-level proxy discovery where the censor actively or passively scans \ac{IP} addresses is not addressed. A censor may monitor all traffic in their network, store the state of the network, and monitor requests and responses to known proxy addresses. This allows the censor to potentially mount a zig-zag attack to connect users together by their proxies \cite{BRIDGEDISCO:2019}. Only proxy discovery by assignment of an attacker to a proxy is explored in this thesis.
 
 \section{Coupon Collector Problem}
 
 In our model, the problem of proxy distribution is simply to distribute a collection of $n$ proxies to some users, where $k$ of these users are attackers, in such a way as to provide a degree of functionality to the honest users. From the censor's viewpoint, it closely aligns to the \ac{CCP} where the proxies are coupons and the censor is the coupon collector.
 
-\ac{CCP} is a classic occupancy problem that considers the number of coupons that must be collected before one has the entire collection of coupons. There are $n$ distinct coupons that are collected one at a time where the $i^{th}$ coupon arrives with probability $p_i$ \cite{motwani1995randomized}. The uniform random algorithm, shown in Figure \ref{uni}, chooses one coupon randomly from the list of total coupons.
+\ac{CCP} is a classic occupancy problem that considers the number of coupons that must be collected before one has the entire collection of coupons. There are $n$ distinct coupons that are collected one at a time where the $i^{th}$ coupon arrives with probability $p_i$ \cite{motwani1995randomized}. The uniform random algorithm, shown in Algorithm \ref{uni}, chooses one coupon randomly from the list of total coupons.
 
-Where probabilities $p_i$ from $i=1$ to $n$ are equal, the arrivals are uniform random. This equi-probable case, where all probabilities of coupons are equal, shows that the probability of obtaining a new coupon $i$ decreases with each draw. The average number of draws to collect all of the coupons is $nH_n$ where $H_n$ is the $n^{th}$ harmonic number \cite{flajolet1992birthday}. We briefly show why this is the case below: 
+Where probabilities $p_i$ from $i=1$ to $n$ are equal, the arrivals are uniform random. This equi-probable case, where all probabilities of coupons are equal, shows that the probability of obtaining a new coupon $i$ decreases with each draw. The average number of draws to collect all of the coupons is $nH_n$ where $H_n$ is the $n^{th}$ harmonic number \cite{flajolet1992birthday}. We briefly show why this is the case below. 
 
-The summation of probabilities of obtaining a distinct coupon, not previously seen is $\frac{n}{n} + \frac{n-1}{n} + \frac{n-2}{n} + ... + \frac{1}{n}$. The probability of receiving a unique coupon decreases by $1$ in the numerator for each selection. The probability of a new coupon in the first draw is $100\%$ for instance, because no coupon has yet appeared. The very last coupon is the most difficult to select with probability = $1/n$.
-By linearity of expectations, where $P_i$ is the probability of obtaining the $i_{th}$ coupon, this can be written as:
+The summation of probabilities of obtaining a distinct coupon, not previously seen, is $\frac{n}{n} + \frac{n-1}{n} + \frac{n-2}{n} + ... + \frac{1}{n}$. The probability of receiving a unique coupon decreases by $1$ in the numerator for each selection. The probability of a new coupon in the first draw is $100\%$ for instance, because no coupon has yet appeared. The very last coupon is the most difficult to select with probability = $1/n$.
+By linearity of expectations, where $p_i$ is the probability of obtaining the $i^{th}$ coupon, this can be written as:
 
-$$P_i = \sum_{i=0}^{n-1}\frac{n-i}{n}$$
+$$p_i = \sum_{i=0}^{n-1}\frac{n-i}{n}$$
 
-This follows a geometric distribution, therefore $E[X_i]=\frac{1}{P_i}$ where $X$ is the sum of the expected number of draws for the $i^{th}$ coupon from $i$ to $n$.
+This follows a geometric distribution, therefore $E[X_i]=\frac{1}{p_i}$ where $X$ is the sum of the expected number of draws for the $i^{th}$ coupon from $i$ to $n$.
 %\ivan{What about $X_i$ -- how is it related to $X$?}
 %\ivan{Make sure to define the variables before you use them in derivations (e.g., $X_i$ here).}
 The expected number of draws for all $n$ coupons in total is:
@@ -62,7 +62,7 @@ Recall that the censor collects $n$ proxies in $E[X]= nH_n$ steps. There is no c
 
 \subsection{Singleton Coupons} 
 
-Variations of the \ac{CCP} are explored in \cite{myers2006some} where a single collector attempts to obtain a specific number of coupons out of $n$ total coupons. As part of this analysis, we use the number of singleton coupons that Myers et al. provide. Singleton coupons are coupons that have been selected exactly once after all of the other coupons have been collected. Most coupons are duplicates and only a few occur only once. On average, the number of singleton coupons is equal to the harmonic number $H_n$.
+Variations of the \ac{CCP} are explored in \cite{myers2006some} where a single collector attempts to obtain a specific number of coupons out of $n$ total coupons. As part of this analysis, we use the number of singleton coupons that Myers et al. provide. Singleton coupons are coupons that have been selected exactly once after all of the other coupons have been collected. Most coupons are duplicates and only a few appear only once. On average, the number of singleton coupons is equal to the harmonic number $H_n$.
 
 \section{Load Balancing} 
 
@@ -109,7 +109,7 @@ The \emph{power of 2 choice} algorithm for load balancing shows that giving two 
 \caption{Power of Two Choices \label{POD}}
 \end{algorithm}
 
-The maximum load in the uniform random case is $\frac{\log n}{\log \log n} + O(1)$ where the number of balls is equal to the number of bins \cite{azar1999balanced}. In the two-choice algorithm, the fullest bin with high probability has $ \frac{\log \log n}{\log d} + O(1)$ balls where the number of bins selected randomly is $2$. Increasing the number of bins $\geq 2$ yields only a constant factor of improvement. The heavily loaded case, where the number of balls strictly increases over the number of bins, $m >> n$, was found to have a maximum load of $m/n + O(\log{\log{n}})$ \cite{berenbrink2000balanced}. \\
+The maximum load in the uniform random case is $\frac{\log n}{\log \log n} + O(1)$ where the number of balls is equal to the number of bins \cite{azar1999balanced}. In the two-choice algorithm, the fullest bin with high probability has $ \frac{\log \log n}{\log 2} + O(1)$ balls where the number of bins selected randomly is $2$. Increasing the number of bins $\geq 2$ yields only a constant factor of improvement. The heavily loaded case, where the number of balls strictly increases over the number of bins, $m >> n$, was found to have a maximum load of $m/n + O(\log{\log{n}})$ \cite{berenbrink2000balanced}. \\
 
 \section{Tor} 
 

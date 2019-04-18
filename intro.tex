@@ -6,8 +6,8 @@ Internet censorship is a significant and growing problem that threatens our free
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=0.8\textwidth]{fig/censor_simple_new.png}
-    \caption{A censor observes a citizen's network activity to the internet outside its control boundary.}
+     \includegraphics[width=0.5\textwidth]{fig/censor_simple_new.png}
+    \caption{A censor observes a citizen's network activity.}
     
     \label{fig:simplecensor}
 \end{figure*}
@@ -18,8 +18,8 @@ This effective censorship technique can be circumvented by means of proxies; sin
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=1.0\textwidth]{fig/censor_block_new.png}
-    \caption{A censor blocks direct access to a site but the citizen uses a proxy to access the internet.}
+     \includegraphics[width=0.6\textwidth]{fig/censor_block_new1.png}
+    \caption{The citizen uses a proxy to access the internet.}
     
     \label{fig:censorblock}
 \end{figure*}
@@ -30,19 +30,19 @@ This effective censorship technique can be circumvented by means of proxies; sin
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=1.0\textwidth]{fig/censor_crs_new.png}
+     \includegraphics[width=0.6\textwidth]{fig/censor_crs_new.png}
     \caption{Censorship circumvention via proxy distribution.}
     \label{fig:proxydistro}
 \end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-To get an idea of the scale of censorship events around the world, Figure \ref{fig:oonimap} shows a world map where the \ac{OONI} project's network measurement tests, \texttt{ooniprobes}, are run daily by volunteers \cite{OONI:2019}. The red areas on the map outline confirmed cases of censorship. Censorship is confirmed by the response body of an \ac{HTTP} request of a blocked page from within a censored country.
+To get an idea of the scale of censorship events around the world, Figure \ref{fig:oonimap} shows a world map where the \ac{OONI} project's network measurement tests, \texttt{ooniprobes}, are run daily by volunteers \cite{OONI:2019}. The red areas on the map outline confirmed cases of censorship. Censorship is confirmed by the response body of a \ac{HTTP} request of a blocked page from within a censored country.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
      \includegraphics[width=1.0\textwidth]{fig/ooni_map.png}
-    \caption{Tor's \ac{OONI} project collects censorship event data.}
+    \caption{\ac{OONI} project's censorship data.}
     
     \label{fig:oonimap}
 \end{figure*}
@@ -50,7 +50,7 @@ To get an idea of the scale of censorship events around the world, Figure \ref{f
 
 Proxies in censorship resistance systems that cannot distinguish between honest users and fake users are destined for discovery over time. Most systems manually \textit{reserve} a set of proxies that is only distributed when all other proxies are compromised. This manual solution is effective, but does not maximize the allocation of proxies. 
 
-We offer a lightweight, elegant solution to the proxy distribution problem by slowing down the progress of the censor to learn new proxies. Our goal is to provide service to clients while \textit{preserving} proxies from distribution, a goal that is complimentary to \textit{reserving} proxies. We introduce a partially random strategy for the proxy distribution problem to distribute proxies to clients while fake clients are present. Our approach uses principles of load balancing in a non-intuitive way to preserve random proxies by unbalancing the load on proxies, making them more difficult to discover. 
+We offer a lightweight, elegant solution to the proxy distribution problem by slowing down the progress of the censor to learn new proxies. Our goal is to provide service to clients while \textit{preserving} proxies from distribution, a goal that is complimentary to \textit{reserving} proxies. We introduce a partially random strategy for the proxy distribution problem to distribute proxies to honest clients while fake clients are present. Our approach uses principles of load balancing in a non-intuitive way to preserve random proxies by unbalancing the load on proxies, making them more difficult to discover. 
 
 We provide an approximation of the censor's required effort to discover all of the proxies in a system based on the coupon collector problem \cite{flajolet1992birthday}. We validate this approach in a simulator that simulates a proxy distributor in a censorship resistance system. \\
 

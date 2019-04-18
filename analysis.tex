@@ -42,16 +42,16 @@ We present a new algorithm, the \emph{needle} algorithm, and compare it to two w
         \item $n$: the total number of proxies
         \item $g$: the number of steps around the proxy ring
         \item $s$: the number of proxies in each $g$ step
-        \item $move$: move to the next step 
+        \item $move$: indicates a move to the next step 
         \item $px_1, px_2$: two randomly selected proxies from within the $sublist$ of the current step $g$, sampled with replacement
     \end{itemize}
 
-The algorithm selects two proxies uniform randomly in each giant step $g$. Using reverse power of 2 choices, it then chooses the \textit{heavier loaded} proxy and returns this proxy to the collector. (Note that the standard power of d choices algorithm chooses the lighter loaded proxy.) The step begins at the bottom of the list of proxies and is moved step-wise around the list eventually wrapping so that all proxies have an opportunity to be selected, shown in Figure \ref{fig:giantstepring}.
+The algorithm selects two proxies uniform randomly in each giant step $g$. Using reverse power of 2 choices, it then chooses the \textit{heavier loaded} proxy and returns this proxy to the collector. (Note that the standard power of d choices algorithm chooses the lighter loaded proxy.) The step begins at the bottom of the list of proxies and is moved step-wise around the list, eventually wrapping around, so that all proxies have an opportunity to be selected, shown in Figure \ref{fig:giantstepring}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=0.5\textwidth]{fig/giant_step_ring.png}
+     \includegraphics[width=0.8\textwidth]{fig/flower.png}
     \caption{$5$ giant steps around a ring of $20$ proxies}
 
     \label{fig:giantstepring}
@@ -67,17 +67,17 @@ We can frame the needle algorithm as a \ac{CCP} variant, we call this the \ac{CC
 
 In our \ac{CCP-R} variant, the reverse power of 2 choices gives the collector a decision to make; he selects 2 coupons at random. If he already has more of 1 coupon than the other, he must keep the coupon that is less rare, and return the rarer coupon back to the store in the current neighbourhood. 
 
-There is an expected number of attempts $E[X]$ by the collector to collect $n$ distinct objects. This can be extended to a censor, whose problem it is to enumerate, or discover, all the proxies. We use $E[X]$ to analyze the amount of effort that it would take a censor, on average, to enumerate all proxies. To simplify this analysis, we do not consider the ratio of honest to malicious clients and, for now, assume there is one malicious client, the censor. Honest and malicious client rates are examined in Section \ref{sec:bystander}, bystanders.
+There is an expected number of attempts $E[X]$ by the collector to collect $n$ distinct objects. This can be extended to a censor, whose problem it is to \textit{enumerate}, or discover, all the proxies. We use $E[X]$ to analyze the amount of effort that it would take a censor, on average, to enumerate all proxies. To simplify this analysis, we do not consider the ratio of honest to malicious clients and, for now, assume there is one malicious client, the censor. Honest and malicious client rates are examined in Section \ref{sec:bystander}, bystanders.
 
 The needle algorithm is partly randomized and partly deterministic. The uniform random selection of 2 proxies is randomized, and the reverse power of 2 choices is deterministic. In addition, the movement of the steps is also deterministic. Because the steps move clock-wise around the ring, proxies are enumerated randomly within deterministic batches. Moving the steps around the ring serves two functions; 1) by limiting the size of proxies in a step, it squeezes the number of possible proxies that a censor can enumerate in each assignment, and 2) some proxies are left behind. This makes it more difficult for the censor to enumerate a complete collection of proxies due to these rare proxies (not unlike needles in a haystack). Restricting the size of the sublists in a step tends towards a deterministic enumeration of all of the proxies, so one must take care to not set too many giant steps. 
 
-In Figure \ref{fig:8ring}, we see how different step sizes affect the enumeration of proxies. With one-step, the enumeration time is the slowest, because the needle proxies must be discovered within the largest pool of size $n$. Enumeration time starts to decrease with 2-steps, because the needle proxies are more likely to be selected with a smaller pool size of $n/2$. The enumeration time decreases with each increase in giant step $g$. The algorithm only functions as expected up to $g=n/2$ where there are at least $2$ proxies for each step. If there is only a single proxy in each step, as shown in the bottom right corner, the proxies are enumerated one after the other in $n$ assignments, because our reverse power of 2 choices algorithm cannot function as intended. We therefore restrict the giant step size to $1>g\leq \frac{n}{2}$ so that the proxies are never enumerated in deterministic order.
+In Figure \ref{fig:8ring}, we see how different step sizes affect the enumeration of proxies. With one-step, the enumeration time is the slowest, because the needle proxies must be discovered within the largest pool of size $n$. Enumeration time starts to decrease with 2-steps, because the needle proxies are more likely to be selected with a smaller pool size of $n/2$. The enumeration time decreases with each increase in giant step $g$. The algorithm only functions as expected up to $g=n/2$ where there are at least $2$ proxies for each step. If there is only a single proxy in each step, as shown in the bottom right corner, the proxies are enumerated one after the other in $n$ assignments, because our reverse power of 2 choices algorithm cannot function as intended. We therefore restrict the giant step size to $1\geq g\leq \frac{n}{2}$ so that the proxies are never enumerated in deterministic order.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=0.5\textwidth]{fig/8_ring.png}
-    \caption{Ring of 8 proxies with steps g=1,2,4,8}
+     \includegraphics[width=0.8\textwidth]{fig/4ringexamples.png}
+    \caption{Rings of 8 proxies each with steps g=1,2,4,8}
 
     \label{fig:8ring}
 \end{figure*}
@@ -153,7 +153,7 @@ Now, we are ready to present the upper bound on the average number of assignment
 
 \emph{Proof.} We use the probability of collecting all of the $H_n$ singleton proxies from Lemma $4$ to provide an upper bound on the average number of assignments needed to enumerate all of the proxies, $E[X]$. 
 
-Like the classic CCP, this follows a geometric distribution, so $E[X_i] =\frac{1}{P_i}$. 
+Like the classic CCP, this follows a geometric distribution, so $E[X_i] =\frac{1}{p_i}$. 
 
 $$E[X_i] = 1/p_i = \frac{1}{\frac{i}{n^2}} = \frac{n^2}{i}$$
 
@@ -168,7 +168,7 @@ When giant step $g$ is very small, the algorithm churns on a few proxies, meanin
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=0.5\textwidth]{fig/giant_step_upper_bound.png}
+     \includegraphics[width=0.8\textwidth]{fig/planets.png}
     \caption{Worst case enumeration in $5$ giant steps.}
 
     \label{fig:ubgs}
@@ -198,7 +198,7 @@ $$p \geq \sum_{i=1}^{\lfloor{H_n}\rfloor} \bigg(\frac{i}{n}\bigg)^2$$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=0.5\textwidth]{fig/giant_step_lower_bound.png}
+     \includegraphics[width=0.6\textwidth]{fig/almost_flower.png}
     \caption{Best case enumeration in $5$ giant steps.}
 
     \label{fig:lbgs}
@@ -226,7 +226,7 @@ Returning to the idea of a ring of proxies, if all of the sublists are enumerate
 
 \emph{Proof.} Using the probability of pairs from Lemma $6$, we have a geometric distribution, so we can write: $$E[X_i] = \frac{1}{p_i} = \frac{1}{(\frac{i}{s})^2} = \bigg(\frac{s}{i}\bigg)^2$$
 
-The expected number of assignments to find all $n$ proxies is bounded below by the sum of $E[X_1]$ to $E[X_n]$, where $n$ is the number of singleton proxies,$n=\lfloor{H_n}\rfloor$:\\
+The expected number of assignments to find all $n$ proxies is bounded below by the sum of $E[X_1]$ to $E[X_n]$, where $n$ is the number of singleton proxies, $n=\lfloor{H_n}\rfloor$:\\
 
 $$E[X] \geq \sum_{i=1}^{\lfloor{H_n}\rfloor} \bigg(\frac{s}{i}\bigg)^2$$
 $$= s^2 \sum_{i=1}^{\lfloor{H_n}\rfloor} \frac{1}{i^2}$$
@@ -236,7 +236,7 @@ We have $g$ such enumerations of sublists with size $s$, one per each $g$ steps,
 
 $$E[X] \geq (g)(s^2)H^{(2)}_{\lfloor{H_n}\rfloor}$$\\
 
-In Figure \ref{fig:ublb}, we show the upper and lower bounds for $100$ proxies with giant steps 1 to 50. The enumeration time drops for each giant step, particularly dramatically where the giant step is increased from 1 to 2. It levels out as the giant step increases create a more deterministic enumeration. 
+In Figure \ref{fig:ublb}, we show the upper and lower bounds for $100$ proxies with giant steps 1 to 50. The enumeration time drops for each giant step, particularly dramatically where the giant step is increased from 1 to 2. It levels out as the giant step increases, as these increases create an increasingly deterministic enumeration. 
 
 This concludes our discussion of bounds on the average number of assignments to enumerate all of the proxies in the needle algorithm. In the next section, we dive into a load balancing analysis to tell us more about how clients are assigned to proxies.
 
@@ -301,7 +301,7 @@ We integrate honest users into our analysis where previously we only included th
     $p_b$     & probability of bystander clients\\
 	$h$     & historical load on a single proxy  \\
 	$\ell$     & optimal load \\
-	$m$     & maximum load \\
+	$u$     & maximum load \\
 
 	\hline
 	\end{tabular}
@@ -324,7 +324,7 @@ $$p_{nx} = (1-p_a)^h$$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure*}[h!]
 \centering
-     \includegraphics[width=0.5\textwidth]{fig/bystander_draw.png}
+     \includegraphics[width=0.6\textwidth]{fig/proxy_examples.png}
     \caption{Proxies $px_1$ to $px_4$ with honest and attacker clients.}
 
     \label{fig:bystandersdraw}
@@ -333,15 +333,15 @@ $$p_{nx} = (1-p_a)^h$$
 
 We generalize the probability of exposure to apply to any proxy in the system using a bound on the maximum load. This is interesting for our bystander analysis because we observe that the probability that a proxy is exposed more closely approaches $100\%$ as the maximum load increases, thereby creating more bystanders.
 
-\begin{lemma}{The probability that any proxy is exposed is $p_x \leq 1 - (1-p_a)^{m}$}
+\begin{lemma}{The probability that any proxy is exposed is $p_x \leq 1 - (1-p_a)^{u}$}
 
-The height of any proxy must be less than or equal to the maximum height $m$ by definition. Without knowing the load on any individual proxy, we can say that the likelihood that an arbitrarily selected proxy is not exposed is less than or equal to the likelihood that the maximum loaded proxy is not exposed.
-$$p_{nx} = (1-p_a)^{h} \leq (1-p_a)^{m}$$.
+The height of any proxy must be less than or equal to the maximum height, $u$, by definition. Without knowing the load on any individual proxy, we can say that the likelihood that an arbitrarily selected proxy is not exposed is less than or equal to the likelihood that the maximum loaded proxy is not exposed.
+$$p_{nx} = (1-p_a)^{h} \leq (1-p_a)^{u}$$.
 
 Conversely, the probability that any randomly selected proxy is exposed is less than or equal to the probability of exposure on the proxy that has the maximum load.
 
 $$p_x = 1 - p_{nx}$$
-$$ \leq 1 - (1-p_a)^{m}$$
+$$ \leq 1 - (1-p_a)^{u}$$
 
 \end{lemma}
 
@@ -349,13 +349,13 @@ The proxy that has the highest load has the highest chance of exposure. In Figur
  
 
 
-\begin{theorem}{The probability of bystanders on a proxy is $$p_b \leq (m)(1-p_a)(1-(1-p_a)^{m})$$}
+\begin{theorem}{The probability of bystanders on a proxy is $$p_b \leq (u)(1-p_a)(1-(1-p_a)^{u})$$}
 \end{theorem}
 
 \textit{Proof.} Honest clients occur with probability $1-p_a$ on any proxy. For an honest client to be considered a bystander, there must be at least one attacker assigned to the proxy. We consider the other attackers on a proxy as wasted resources on the part of the attacker.
 
-We know from Lemma $12$ that the probability that any proxy is exposed is $p_x \leq 1 - (1-p_a)^{m}$. If $p_x = 0$ then there are no bystanders, because the proxy is not exposed. (In order for honest clients to be defined as bystanders, the proxy must be exposed by at least one attacker.) Therefore, we can say that the probability of bystanders on any proxy is less than the probability of bystanders on the proxy with the maximum load.
+We know from Lemma $12$ that the probability that any proxy is exposed is $p_x \leq 1 - (1-p_a)^{u}$. If $p_x = 0$ then there are no bystanders, because the proxy is not exposed. (In order for honest clients to be defined as bystanders, the proxy must be exposed by at least one attacker.) Therefore, we can say that the probability of bystanders on any proxy is less than the probability of bystanders on the proxy with the maximum load.
 
-$$p_b \leq (m)(1-p_a)(1-(1-p_a)^{m})$$\\
+$$p_b \leq (u)(1-p_a)(1-(1-p_a)^{u})$$\\
 
 We have shown that the amount of collateral damage, expressed by the probability of bystanders on a proxy, relies on the proxy load and the probability of attackers in each assignment. There are other interesting stories to tell about the impact of unbalancing proxy loads for proxy preservation. If we have a system that is perfectly balanced, with all proxy loads equal to $\ell$, intuitively we suspect that there will be more innocent bystanders $b$. We may reason that with lower proxy loads, such as those held in the needle algorithm of proxies $px_1$ to $px_{\frac{n}{2}-1}$, result in fewer bystanders because the likelihood of a malicious client attacker is reduced. We may also reason that in higher loaded proxies, there is more chance of proxy enumeration, but more wasted resources by the attacker. These musings are examined in Chapter \ref{sec:eval} through empirical data based on simulations of systems using the needle algorithm, uniform random distribution, power of 2 choices, and Tor's \texttt{bridgedb} proxy distribution strategy. 
